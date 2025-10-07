@@ -1,0 +1,7 @@
+﻿CREATE TABLE [dbo].[Municipality]
+(
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
+    [Name] VARCHAR(100) NOT NULL, 
+    [City] VARCHAR(100) NOT NULL, 
+    [Status] BIT NOT NULL DEFAULT 1
+)

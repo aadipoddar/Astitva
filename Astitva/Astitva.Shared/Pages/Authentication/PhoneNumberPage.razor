@@ -1,3 +1,60 @@
-﻿<SfTextBox Placeholder="Enter Phone Number" Type="InputType.Number" />
+﻿@page "/phone-number"
 
-<SfButton Content="Get OTP" />
+<div class="auth-page-wrapper">
+	<div class="auth-background">
+		<div class="floating-shapes">
+			<div class="shape shape-1"></div>
+			<div class="shape shape-2"></div>
+			<div class="shape shape-3"></div>
+			<div class="shape shape-4"></div>
+		</div>
+	</div>
+	
+	<div class="auth-container phone-auth-container">
+		<div class="auth-card @(_isProcessing ? "processing" : "")">
+			<div class="auth-header">
+				<div class="logo-container">
+					<div class="logo-icon">📱</div>
+				</div>
+				<h1 class="auth-title">Welcome</h1>
+				<p class="auth-subtitle">Enter your phone number to continue</p>
+			</div>
+			
+			<div class="auth-form">
+				<div class="input-group @(!string.IsNullOrEmpty(_phoneNumber) ? "has-value" : "") @(!string.IsNullOrEmpty(_errorMessage) ? "has-error" : "")">
+					<label class="input-label">Phone Number</label>
+					<div class="input-wrapper">
+						<span class="country-code">+91</span>
+						<SfTextBox @bind-Value="_phoneNumber" 
+								   CssClass="auth-input phone-input"
+								   Placeholder="Enter 10-digit number" 
+								   Type="InputType.Number" 
+								   MaxLength="10"
+								   Enabled="!_isProcessing" />
+					</div>
+				</div>
+
+				@if (!string.IsNullOrEmpty(_errorMessage))
+				{
+					<div class="error-message animate-shake">
+						<span class="error-icon">⚠️</span>
+						@_errorMessage
+					</div>
+				}
+
+				<SfButton Content="@GetButtonContent()" 
+						  CssClass="@GetButtonClass()"
+						  OnClick="GenerateOTP" 
+						  Disabled="@(_phoneNumber.Length != 10 || _isProcessing)" />
+						  
+				<div class="auth-footer">
+					<p class="terms-text">
+						By continuing, you agree to our 
+						<a href="#" class="terms-link">Terms of Service</a> and 
+						<a href="#" class="terms-link">Privacy Policy</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

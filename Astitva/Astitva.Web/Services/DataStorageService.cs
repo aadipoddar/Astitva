@@ -1,5 +1,7 @@
 ﻿using Astitva.Shared.Services;
 
+using AstitvaLibrary.Data.Common;
+
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace Astitva.Web.Services;
@@ -19,7 +21,7 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
 
 	public async Task SecureRemoveAll()
 	{
-		//await _protectedLocalStorage.DeleteAsync(StorageFileNames.UserDataFileName);
+		await _protectedLocalStorage.DeleteAsync(StorageFileNames.UserDataFileName);
 	}
 
 
