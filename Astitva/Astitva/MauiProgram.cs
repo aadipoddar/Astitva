@@ -5,6 +5,8 @@ using AstitvaLibrary.DataAccess;
 
 using Microsoft.Extensions.Logging;
 
+using Plugin.LocalNotification;
+
 using Syncfusion.Blazor;
 
 namespace Astitva;
@@ -19,6 +21,7 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+			.UseLocalNotification()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -31,7 +34,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IDataStorageService, DataStorageService>();
 		builder.Services.AddSingleton<IVibrationService, VibrationService>();
 		builder.Services.AddSingleton<ISoundService, SoundService>();
-		builder.Services.AddScoped<INotificationService, NotificationService>();
+		builder.Services.AddScoped<Shared.Services.INotificationService, NotificationService>();
 
 		builder.Services.AddMauiBlazorWebView();
 		builder.Services.AddSyncfusionBlazor();

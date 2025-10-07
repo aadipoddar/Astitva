@@ -1,6 +1,305 @@
+using Astitva.Shared.Services;
+using AstitvaLibrary.Data;
+using AstitvaLibrary.DataAccess;
+using AstitvaLibrary.Models;
+using AstitvaLibrary.Exporting;
+using System.ComponentModel.DataAnnotations;
+
 namespace Astitva.Shared.Pages.Certificate;
 
 public partial class DeathCertificatePage
 {
+    private UserModel _user;
+    private DeathCertificateModel _deathCertificateModel = new();
+    private List<MunicipalityModel> _municipalities = new();
 
+    // Form state management
+    private bool _isLoading = true;
+    private bool _isSaving = false;
+    private Dictionary<string, string> _validationErrors = new();
+    private bool _showValidationSummary = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
+            _user = authResult.User;
+            await LoadData();
+            await LoadExistingCertificate();
+        }
+        catch (Exception ex)
+        {
+            await NotificationService.ShowLocalNotification(1, "Error", "Loading Failed", $"Failed to load form: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadData()
+    {
+        _municipalities = await CommonData.LoadTableDataByStatus<MunicipalityModel>(TableNames.Municipality);
+
+        // Initialize default values
+        _deathCertificateModel.DateOfDeath = DateOnly.FromDateTime(DateTime.Now.AddDays(-1));
+        _deathCertificateModel.RegistrationDate = DateOnly.FromDateTime(DateTime.Now);
+    }
+
+    private async Task LoadExistingCertificate()
+    {
+        try
+        {
+            var existingCertificate = await DeathCertificateData.LoadDeathCertificateByUser(_user.Id);
+            if (existingCertificate != null)
+            {
+                _deathCertificateModel = existingCertificate;
+            }
+        }
+        catch (Exception)
+        {
+            // If no existing certificate found, continue with new form
+        }
+    }
+
+    private bool ValidateForm()
+    {
+        _validationErrors.Clear();
+        _showValidationSummary = false;
+
+        // Required field validations
+        if (string.IsNullOrWhiteSpace(_deathCertificateModel.FirstName))
+            _validationErrors["FirstName"] = "First name is required";
+        else if (_deathCertificateModel.FirstName.Length < 2)
+            _validationErrors["FirstName"] = "First name must be at least 2 characters";
+        else if (_deathCertificateModel.FirstName.Length > 50)
+            _validationErrors["FirstName"] = "First name cannot exceed 50 characters";
+
+        if (string.IsNullOrWhiteSpace(_deathCertificateModel.Sex))
+            _validationErrors["Sex"] = "Sex is required";
+        else if (!new[] { "Male", "Female", "Other" }.Contains(_deathCertificateModel.Sex))
+            _validationErrors["Sex"] = "Please select a valid sex";
+
+        if (_deathCertificateModel.DateOfDeath == default)
+            _validationErrors["DateOfDeath"] = "Date of death is required";
+        else if (_deathCertificateModel.DateOfDeath > DateOnly.FromDateTime(DateTime.Now))
+            _validationErrors["DateOfDeath"] = "Date of death cannot be in the future";
+        else if (_deathCertificateModel.DateOfDeath < DateOnly.FromDateTime(DateTime.Now.AddYears(-150)))
+            _validationErrors["DateOfDeath"] = "Please enter a valid date of death";
+
+        if (_deathCertificateModel.MunicipalityId <= 0)
+            _validationErrors["MunicipalityId"] = "Please select a municipality";
+
+        // Optional field validations (if provided)
+        if (!string.IsNullOrWhiteSpace(_deathCertificateModel.MiddleName) && _deathCertificateModel.MiddleName.Length > 50)
+            _validationErrors["MiddleName"] = "Middle name cannot exceed 50 characters";
+
+        if (!string.IsNullOrWhiteSpace(_deathCertificateModel.LastName) && _deathCertificateModel.LastName.Length > 50)
+            _validationErrors["LastName"] = "Last name cannot exceed 50 characters";
+
+        if (!string.IsNullOrWhiteSpace(_deathCertificateModel.FatherName) && _deathCertificateModel.FatherName.Length > 100)
+            _validationErrors["FatherName"] = "Father's name cannot exceed 100 characters";
+
+        if (!string.IsNullOrWhiteSpace(_deathCertificateModel.MotherName) && _deathCertificateModel.MotherName.Length > 100)
+            _validationErrors["MotherName"] = "Mother's name cannot exceed 100 characters";
+
+        if (!string.IsNullOrWhiteSpace(_deathCertificateModel.DeathPlace) && _deathCertificateModel.DeathPlace.Length > 200)
+            _validationErrors["DeathPlace"] = "Place of death cannot exceed 200 characters";
+
+        if (!string.IsNullOrWhiteSpace(_deathCertificateModel.Address) && _deathCertificateModel.Address.Length > 500)
+            _validationErrors["Address"] = "Address cannot exceed 500 characters";
+
+        if (_validationErrors.Any())
+        {
+            _showValidationSummary = true;
+            VibrationService.VibrateWithTime(300);
+        }
+
+        return !_validationErrors.Any();
+    }
+
+    private async Task SaveDetails()
+    {
+        if (_isSaving) return;
+
+        if (!ValidateForm())
+        {
+            StateHasChanged();
+            return;
+        }
+
+        _isSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            // Set system fields
+            _deathCertificateModel.UserId = _user.Id;
+            _deathCertificateModel.Status = true;
+            _deathCertificateModel.Approved = false;
+            _deathCertificateModel.RegistrationDate = DateOnly.FromDateTime(DateTime.Now);
+
+            // Clean optional fields
+            _deathCertificateModel.MiddleName = string.IsNullOrWhiteSpace(_deathCertificateModel.MiddleName) ? null : _deathCertificateModel.MiddleName.Trim();
+            _deathCertificateModel.LastName = string.IsNullOrWhiteSpace(_deathCertificateModel.LastName) ? null : _deathCertificateModel.LastName.Trim();
+            _deathCertificateModel.FatherName = string.IsNullOrWhiteSpace(_deathCertificateModel.FatherName) ? null : _deathCertificateModel.FatherName.Trim();
+            _deathCertificateModel.MotherName = string.IsNullOrWhiteSpace(_deathCertificateModel.MotherName) ? null : _deathCertificateModel.MotherName.Trim();
+            _deathCertificateModel.DeathPlace = string.IsNullOrWhiteSpace(_deathCertificateModel.DeathPlace) ? null : _deathCertificateModel.DeathPlace.Trim();
+            _deathCertificateModel.Address = string.IsNullOrWhiteSpace(_deathCertificateModel.Address) ? null : _deathCertificateModel.Address.Trim();
+
+            await DeathCertificateData.InsertDeathCertificate(_deathCertificateModel);
+
+            // Save to local storage for backup
+            await DataStorageService.LocalSaveAsync(StorageFileNames.DeathCertificateFileName,
+                System.Text.Json.JsonSerializer.Serialize(_deathCertificateModel));
+
+            // Generate and save certificate
+            await GenerateAndSaveCertificate();
+
+            VibrationService.VibrateHapticClick();
+
+            await NotificationService.ShowLocalNotification(
+                1,
+                "Success",
+                "Death Certificate Saved",
+                "Your death certificate application has been submitted and certificate generated successfully!");
+
+            // Navigate back to home
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            await NotificationService.ShowLocalNotification(
+                2,
+                "Error",
+                "Save Failed",
+                $"Failed to save certificate: {ex.Message}");
+
+            VibrationService.VibrateWithTime(500);
+        }
+        finally
+        {
+            _isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    private void CancelForm()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void ClearForm()
+    {
+        _deathCertificateModel = new DeathCertificateModel
+        {
+            DateOfDeath = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
+            RegistrationDate = DateOnly.FromDateTime(DateTime.Now)
+        };
+        _validationErrors.Clear();
+        _showValidationSummary = false;
+        StateHasChanged();
+    }
+
+    private string GetValidationClass(string fieldName)
+    {
+        return _validationErrors.ContainsKey(fieldName) ? "has-error" : string.Empty;
+    }
+
+    private string GetValidationMessage(string fieldName)
+    {
+        return _validationErrors.TryGetValue(fieldName, out var message) ? message : string.Empty;
+    }
+
+    private string GetButtonContent()
+    {
+        if (_isSaving) return "Saving...";
+        if (_deathCertificateModel.Id > 0) return "Update Certificate";
+        return "Save Certificate";
+    }
+
+    private string GetButtonClass()
+    {
+        var baseClass = "save-button";
+        if (_isSaving) return $"{baseClass} saving";
+        return $"{baseClass} primary";
+    }
+
+    private async Task GenerateAndSaveCertificate()
+    {
+        try
+        {
+            // Get municipality details
+            var municipality = _municipalities.FirstOrDefault(m => m.Id == _deathCertificateModel.MunicipalityId);
+
+            // Generate professional PDF certificate
+            using var certificateStream = DeathCertificatePDFExport.GenerateDeathCertificate(_deathCertificateModel, municipality, _user);
+
+            // Generate filename
+            var fileName = DeathCertificatePDFExport.GenerateFileName(_deathCertificateModel, _user);
+
+            // Save certificate as PDF
+            await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
+
+            await NotificationService.ShowLocalNotification(
+                10,
+                "Certificate Generated",
+                "Download Complete",
+                "Your professional death certificate PDF has been generated and saved successfully!");
+        }
+        catch (Exception ex)
+        {
+            await NotificationService.ShowLocalNotification(
+                11,
+                "Warning",
+                "Certificate Generation Failed",
+                $"Certificate saved but PDF generation failed: {ex.Message}");
+        }
+    }
+
+    private async Task DownloadCertificate()
+    {
+        if (_deathCertificateModel.Id <= 0) return;
+
+        try
+        {
+            await NotificationService.ShowLocalNotification(
+                12,
+                "Download",
+                "Generating Certificate",
+                "Generating your professional death certificate PDF for download...");
+
+            // Get municipality details
+            var municipality = _municipalities.FirstOrDefault(m => m.Id == _deathCertificateModel.MunicipalityId);
+
+            // Generate professional PDF certificate
+            using var certificateStream = DeathCertificatePDFExport.GenerateDeathCertificate(_deathCertificateModel, municipality, _user);
+
+            // Generate filename
+            var fileName = DeathCertificatePDFExport.GenerateFileName(_deathCertificateModel, _user);
+
+            // Save certificate as PDF
+            await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
+
+            VibrationService.VibrateHapticClick();
+
+            await NotificationService.ShowLocalNotification(
+                13,
+                "Success",
+                "Download Complete",
+                "Your professional death certificate PDF has been downloaded successfully!");
+        }
+        catch (Exception ex)
+        {
+            await NotificationService.ShowLocalNotification(
+                14,
+                "Error",
+                "Download Failed",
+                $"Failed to download certificate: {ex.Message}");
+
+            VibrationService.VibrateWithTime(500);
+        }
+    }
 }

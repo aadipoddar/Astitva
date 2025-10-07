@@ -2,7 +2,9 @@
 using Astitva.Shared.Services;
 
 using AstitvaLibrary.Data;
+using AstitvaLibrary.DataAccess;
 using AstitvaLibrary.Models;
+using AstitvaLibrary.Exporting;
 
 namespace Astitva.Shared.Pages;
 
@@ -56,20 +58,22 @@ public partial class Home
 
 		try
 		{
-			await NotificationService.ShowLocalNotification(2, "Download", "Birth Certificate", "Downloading birth certificate...");
+			await NotificationService.ShowLocalNotification(2, "Download", "Birth Certificate", "Generating professional birth certificate PDF...");
 
-			// Generate certificate content
-			var certificateContent = GenerateBirthCertificateContent();
-			var certificateBytes = System.Text.Encoding.UTF8.GetBytes(certificateContent);
+			// Get municipality details
+			var municipality = await CommonData.LoadTableDataById<MunicipalityModel>(TableNames.Municipality, _birthCertificate.MunicipalityId);
 
-			using var memoryStream = new MemoryStream(certificateBytes);
-			var fileName = $"BirthCertificate_{_birthCertificate.FirstName}_{_birthCertificate.RegistrationNo}.txt";
+			// Generate professional PDF certificate
+			using var certificateStream = BirthCertificatePDFExport.GenerateBirthCertificate(_birthCertificate, municipality, _user);
 
-			// For now we'll save as text, but you can integrate with a PDF library later
-			await SaveAndViewService.SaveAndView(fileName, "text/plain", memoryStream);
+			// Generate filename
+			var fileName = BirthCertificatePDFExport.GenerateFileName(_birthCertificate, _user);
+
+			// Save certificate as PDF
+			await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
 
 			VibrationService.VibrateWithTime(200);
-			await NotificationService.ShowLocalNotification(6, "Success", "Download Complete", "Birth certificate downloaded successfully!");
+			await NotificationService.ShowLocalNotification(6, "Success", "Download Complete", "Professional birth certificate PDF downloaded successfully!");
 		}
 		catch (Exception ex)
 		{
@@ -83,20 +87,22 @@ public partial class Home
 
 		try
 		{
-			await NotificationService.ShowLocalNotification(4, "Download", "Death Certificate", "Downloading death certificate...");
+			await NotificationService.ShowLocalNotification(4, "Download", "Death Certificate", "Generating professional death certificate PDF...");
 
-			// Generate certificate content
-			var certificateContent = GenerateDeathCertificateContent();
-			var certificateBytes = System.Text.Encoding.UTF8.GetBytes(certificateContent);
+			// Get municipality details
+			var municipality = await CommonData.LoadTableDataById<MunicipalityModel>(TableNames.Municipality, _deathCertificate.MunicipalityId);
 
-			using var memoryStream = new MemoryStream(certificateBytes);
-			var fileName = $"DeathCertificate_{_deathCertificate.FirstName}_{_deathCertificate.RegistrationNo}.txt";
+			// Generate professional PDF certificate
+			using var certificateStream = DeathCertificatePDFExport.GenerateDeathCertificate(_deathCertificate, municipality, _user);
 
-			// For now we'll save as text, but you can integrate with a PDF library later
-			await SaveAndViewService.SaveAndView(fileName, "text/plain", memoryStream);
+			// Generate filename
+			var fileName = DeathCertificatePDFExport.GenerateFileName(_deathCertificate, _user);
+
+			// Save certificate as PDF
+			await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
 
 			VibrationService.VibrateWithTime(200);
-			await NotificationService.ShowLocalNotification(7, "Success", "Download Complete", "Death certificate downloaded successfully!");
+			await NotificationService.ShowLocalNotification(7, "Success", "Download Complete", "Professional death certificate PDF downloaded successfully!");
 		}
 		catch (Exception ex)
 		{
@@ -104,73 +110,10 @@ public partial class Home
 		}
 	}
 
-	private string GenerateBirthCertificateContent()
-	{
-		return $@"
-BIRTH CERTIFICATE
-==================
 
-Registration No: {_birthCertificate.RegistrationNo}
-Registration Date: {_birthCertificate.RegistrationDate:dd MMMM yyyy}
 
-PERSONAL INFORMATION
---------------------
-Full Name: {GetFullName(_birthCertificate.FirstName, _birthCertificate.MiddleName, _birthCertificate.LastName)}
-Date of Birth: {_birthCertificate.DateOfBirth:dd MMMM yyyy}
-Sex: {_birthCertificate.Sex}
-
-PARENT INFORMATION
-------------------
-Father's Name: {_birthCertificate.FatherName ?? "Not specified"}
-Mother's Name: {_birthCertificate.MotherName ?? "Not specified"}
-
-REGISTRATION DETAILS
---------------------
-Municipality ID: {_birthCertificate.MunicipalityId}
-Status: {(_birthCertificate.Status ? "Active" : "Inactive")}
-
-Generated on: {DateTime.Now:dd MMMM yyyy HH:mm:ss}
-";
-	}
-
-	private string GenerateDeathCertificateContent()
-	{
-		return $@"
-DEATH CERTIFICATE
-=================
-
-Registration No: {_deathCertificate.RegistrationNo?.ToString() ?? "Not assigned"}
-Registration Date: {_deathCertificate.RegistrationDate:dd MMMM yyyy}
-
-PERSONAL INFORMATION
---------------------
-Full Name: {GetFullName(_deathCertificate.FirstName, _deathCertificate.MiddleName, _deathCertificate.LastName)}
-Date of Death: {_deathCertificate.DateOfDeath:dd MMMM yyyy}
-Sex: {_deathCertificate.Sex}
-
-PARENT INFORMATION
-------------------
-Father's Name: {_deathCertificate.FatherName ?? "Not specified"}
-Mother's Name: {_deathCertificate.MotherName ?? "Not specified"}
-
-DEATH DETAILS
--------------
-Place of Death: {_deathCertificate.DeathPlace ?? "Not specified"}
-Address: {_deathCertificate.Address ?? "Not specified"}
-
-REGISTRATION DETAILS
---------------------
-Municipality ID: {_deathCertificate.MunicipalityId}
-User ID: {_deathCertificate.UserId}
-Approved: {(_deathCertificate.Approved ? "Yes" : "No")}
-Status: {(_deathCertificate.Status ? "Active" : "Inactive")}
-
-Generated on: {DateTime.Now:dd MMMM yyyy HH:mm:ss}
-";
-	}
-
-	private void NavigateToBirthCertificate() => NavigationManager.NavigateTo("/birth-certificate");
-	private void NavigateToDeathCertificate() => NavigationManager.NavigateTo("/death-certificate");
+	private void NavigateToBirthCertificate() => NavigationManager.NavigateTo("/certificate/birth");
+	private void NavigateToDeathCertificate() => NavigationManager.NavigateTo("/certificate/death");
 
 	private async Task Logout() =>
 		await AuthService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);

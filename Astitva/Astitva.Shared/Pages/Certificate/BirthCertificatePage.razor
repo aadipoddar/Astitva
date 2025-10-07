@@ -1,3 +1,278 @@
-﻿<h3>BirthCertificatePage</h3>
+﻿@page "/birth-certificate"
+@using AstitvaLibrary.Models
+@using AstitvaLibrary.Data
 
+<PageTitle>Birth Certificate - Astitva</PageTitle>
 
+<div class="certificate-page-wrapper">
+	<div class="certificate-background">
+		<div class="floating-shapes">
+			<div class="shape shape-1"></div>
+			<div class="shape shape-2"></div>
+			<div class="shape shape-3"></div>
+			<div class="shape shape-4"></div>
+		</div>
+	</div>
+
+	<div class="certificate-container">
+		@if (_isLoading)
+		{
+			<div class="loading-container">
+				<div class="loading-spinner"></div>
+				<p class="loading-text">Loading birth certificate form...</p>
+			</div>
+		}
+		else
+		{
+			<div class="certificate-form-card">
+				<!-- Header -->
+				<div class="form-header">
+					<div class="form-icon">👶</div>
+					<h1 class="form-title">Birth Certificate Application</h1>
+					<p class="form-subtitle">Please fill in all required information carefully</p>
+				</div>
+
+				<!-- Validation Summary -->
+				@if (_showValidationSummary && _validationErrors.Any())
+				{
+					<div class="validation-summary">
+						<div class="validation-header">
+							<span class="validation-icon">⚠️</span>
+							<span class="validation-title">Please correct the following errors:</span>
+						</div>
+						<ul class="validation-list">
+							@foreach (var error in _validationErrors.Values)
+							{
+								<li>@error</li>
+							}
+						</ul>
+					</div>
+				}
+
+				<!-- Form Content -->
+				<div class="form-content">
+					<!-- Personal Information Section -->
+					<div class="form-section">
+						<h3 class="section-title">Personal Information</h3>
+						<div class="form-row">
+							<div class="form-group required">
+								<label class="form-label">First Name</label>
+								<div class="input-wrapper @GetValidationClass("FirstName")">
+									<SfTextBox @bind-Value="_birthCertificateModel.FirstName" 
+											   Placeholder="Enter first name"
+											   CssClass="form-input"
+											   MaxLength="50"
+											   Enabled="!_isSaving" />
+								</div>
+								@if (!string.IsNullOrEmpty(GetValidationMessage("FirstName")))
+								{
+									<div class="validation-message">@GetValidationMessage("FirstName")</div>
+								}
+							</div>
+
+							<div class="form-group">
+								<label class="form-label">Middle Name</label>
+								<div class="input-wrapper @GetValidationClass("MiddleName")">
+									<SfTextBox @bind-Value="_birthCertificateModel.MiddleName" 
+											   Placeholder="Enter middle name (optional)"
+											   CssClass="form-input"
+											   MaxLength="50"
+											   Enabled="!_isSaving" />
+								</div>
+								@if (!string.IsNullOrEmpty(GetValidationMessage("MiddleName")))
+								{
+									<div class="validation-message">@GetValidationMessage("MiddleName")</div>
+								}
+							</div>
+						</div>
+
+						<div class="form-row">
+							<div class="form-group">
+								<label class="form-label">Last Name</label>
+								<div class="input-wrapper @GetValidationClass("LastName")">
+									<SfTextBox @bind-Value="_birthCertificateModel.LastName" 
+											   Placeholder="Enter last name (optional)"
+											   CssClass="form-input"
+											   MaxLength="50"
+											   Enabled="!_isSaving" />
+								</div>
+								@if (!string.IsNullOrEmpty(GetValidationMessage("LastName")))
+								{
+									<div class="validation-message">@GetValidationMessage("LastName")</div>
+								}
+							</div>
+
+							<div class="form-group required">
+								<label class="form-label">Sex</label>
+								<div class="input-wrapper @GetValidationClass("Sex")">
+									<SfDropDownList TItem="string" 
+													TValue="string" 
+													DataSource="@(new[] { "Male", "Female", "Other" })"
+													@bind-Value="_birthCertificateModel.Sex"
+													Placeholder="Select sex"
+													CssClass="form-input"
+													Enabled="!_isSaving">
+									</SfDropDownList>
+								</div>
+								@if (!string.IsNullOrEmpty(GetValidationMessage("Sex")))
+								{
+									<div class="validation-message">@GetValidationMessage("Sex")</div>
+								}
+							</div>
+						</div>
+
+						<div class="form-row">
+							<div class="form-group required">
+								<label class="form-label">Date of Birth</label>
+								<div class="input-wrapper @GetValidationClass("DateOfBirth")">
+									<SfDatePicker @bind-Value="_birthCertificateModel.DateOfBirth" 
+												  Placeholder="Select date of birth"
+												  CssClass="form-input"
+												  Max="DateTime.Now"
+												  Min="DateTime.Now.AddYears(-150)"
+												  Format="dd/MM/yyyy"
+												  Enabled="!_isSaving" />
+								</div>
+								@if (!string.IsNullOrEmpty(GetValidationMessage("DateOfBirth")))
+								{
+									<div class="validation-message">@GetValidationMessage("DateOfBirth")</div>
+								}
+							</div>
+
+							<div class="form-group">
+								<label class="form-label">Birth Place</label>
+								<div class="input-wrapper @GetValidationClass("BirthPlace")">
+									<SfTextBox @bind-Value="_birthCertificateModel.BirthPlace" 
+											   Placeholder="Enter birth place (optional)"
+											   CssClass="form-input"
+											   MaxLength="200"
+											   Enabled="!_isSaving" />
+								</div>
+								@if (!string.IsNullOrEmpty(GetValidationMessage("BirthPlace")))
+								{
+									<div class="validation-message">@GetValidationMessage("BirthPlace")</div>
+								}
+							</div>
+						</div>
+					</div>
+
+					<!-- Parent Information Section -->
+					<div class="form-section">
+						<h3 class="section-title">Parent Information</h3>
+						<div class="form-row">
+							<div class="form-group">
+								<label class="form-label">Father's Name</label>
+								<div class="input-wrapper @GetValidationClass("FatherName")">
+									<SfTextBox @bind-Value="_birthCertificateModel.FatherName" 
+											   Placeholder="Enter father's name (optional)"
+											   CssClass="form-input"
+											   MaxLength="100"
+											   Enabled="!_isSaving" />
+								</div>
+								@if (!string.IsNullOrEmpty(GetValidationMessage("FatherName")))
+								{
+									<div class="validation-message">@GetValidationMessage("FatherName")</div>
+								}
+							</div>
+
+							<div class="form-group">
+								<label class="form-label">Mother's Name</label>
+								<div class="input-wrapper @GetValidationClass("MotherName")">
+									<SfTextBox @bind-Value="_birthCertificateModel.MotherName" 
+											   Placeholder="Enter mother's name (optional)"
+											   CssClass="form-input"
+											   MaxLength="100"
+											   Enabled="!_isSaving" />
+								</div>
+								@if (!string.IsNullOrEmpty(GetValidationMessage("MotherName")))
+								{
+									<div class="validation-message">@GetValidationMessage("MotherName")</div>
+								}
+							</div>
+						</div>
+					</div>
+
+					<!-- Registration Information Section -->
+					<div class="form-section">
+						<h3 class="section-title">Registration Information</h3>
+						<div class="form-row">
+							<div class="form-group required">
+								<label class="form-label">Municipality</label>
+								<div class="input-wrapper @GetValidationClass("MunicipalityId")">
+									<SfComboBox TItem="MunicipalityModel"
+												TValue="int"
+												DataSource="_municipalities"
+												@bind-Value="_birthCertificateModel.MunicipalityId"
+												Placeholder="Select municipality"
+												CssClass="form-input"
+												Enabled="!_isSaving">
+										<ComboBoxFieldSettings Text="Name" Value="Id" />
+									</SfComboBox>
+								</div>
+								@if (!string.IsNullOrEmpty(GetValidationMessage("MunicipalityId")))
+								{
+									<div class="validation-message">@GetValidationMessage("MunicipalityId")</div>
+								}
+							</div>
+
+							<div class="form-group">
+								<label class="form-label">Registration Number</label>
+								<div class="input-wrapper @GetValidationClass("RegistrationNo")">
+									<SfNumericTextBox @bind-Value="_birthCertificateModel.RegistrationNo" 
+													  Placeholder="Registration number (optional)"
+													  CssClass="form-input"
+													  Enabled="!_isSaving" />
+								</div>
+								@if (!string.IsNullOrEmpty(GetValidationMessage("RegistrationNo")))
+								{
+									<div class="validation-message">@GetValidationMessage("RegistrationNo")</div>
+								}
+							</div>
+						</div>
+
+						<div class="form-row">
+							<div class="form-group full-width">
+								<label class="form-label">Address</label>
+								<div class="input-wrapper @GetValidationClass("Address")">
+									<SfTextBox @bind-Value="_birthCertificateModel.Address" 
+											   Placeholder="Enter current address (optional)"
+											   CssClass="form-input"
+											   Multiline="true"
+											   MaxLength="500"
+											   Enabled="!_isSaving" />
+								</div>
+								@if (!string.IsNullOrEmpty(GetValidationMessage("Address")))
+								{
+									<div class="validation-message">@GetValidationMessage("Address")</div>
+								}
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Form Actions -->
+				<div class="form-actions">
+					<SfButton Content="Clear Form" 
+							  CssClass="clear-button secondary-button" 
+							  OnClick="ClearForm" 
+							  Disabled="_isSaving" />
+					<SfButton Content="Cancel" 
+							  CssClass="cancel-button secondary-button" 
+							  OnClick="CancelForm" 
+							  Disabled="_isSaving" />
+					@if (_birthCertificateModel.Id > 0)
+					{
+						<SfButton Content="Download Certificate" 
+								  CssClass="download-button secondary-button" 
+								  OnClick="DownloadCertificate" 
+								  Disabled="_isSaving" />
+					}
+					<SfButton Content="@GetButtonContent()" 
+							  CssClass="@GetButtonClass()" 
+							  OnClick="SaveDetails" 
+							  Disabled="_isSaving" />
+				</div>
+			</div>
+		}
+	</div>
+</div>

@@ -1,7 +1,6 @@
 ﻿@page "/"
 @using Astitva.Shared.Services
 @inject IFormFactor FormFactor
-@inject ISaveAndViewService SaveAndViewService
 
 <PageTitle>Astitva - Home</PageTitle>
 
@@ -26,10 +25,10 @@
 				<h1 class="welcome-title">Welcome to Astitva</h1>
 				<p class="welcome-subtitle">Your Digital Certificate Manager</p>
 			</div>
-			
+
 			<div class="user-actions">
-				<SfButton Content="Log Out" 
-						  CssClass="logout-button" 
+				<SfButton Content="Log Out"
+						  CssClass="logout-button"
 						  OnClick="Logout" />
 			</div>
 		</div>
@@ -69,12 +68,9 @@
 									</div>
 								</div>
 								<div class="card-actions">
-									<SfButton Content="Download" 
-											  CssClass="download-button primary-button" 
+									<SfButton Content="Download"
+											  CssClass="download-button primary-button"
 											  OnClick="DownloadBirthCertificate" />
-									<SfButton Content="Edit" 
-											  CssClass="edit-button secondary-button" 
-											  OnClick="NavigateToBirthCertificate" />
 								</div>
 							</div>
 						}
@@ -103,12 +99,9 @@
 									</div>
 								</div>
 								<div class="card-actions">
-									<SfButton Content="Download" 
-											  CssClass="download-button primary-button" 
+									<SfButton Content="Download"
+											  CssClass="download-button primary-button"
 											  OnClick="DownloadDeathCertificate" />
-									<SfButton Content="Edit" 
-											  CssClass="edit-button secondary-button" 
-											  OnClick="NavigateToDeathCertificate" />
 								</div>
 							</div>
 						}
@@ -130,27 +123,34 @@
 			<div class="add-certificates-section">
 				<h2 class="section-title">Add New Certificate</h2>
 				<div class="add-certificates-grid">
-					<div class="add-certificate-card">
-						<div class="add-card-content">
-							<div class="add-certificate-icon">👶</div>
-							<h3 class="add-certificate-title">Birth Certificate</h3>
-							<p class="add-certificate-description">Register a new birth certificate with complete details</p>
-						</div>
-						<SfButton Content="Add Birth Certificate" 
-								  CssClass="add-button primary-button" 
-								  OnClick="NavigateToBirthCertificate" />
-					</div>
 
-					<div class="add-certificate-card">
-						<div class="add-card-content">
-							<div class="add-certificate-icon">🕊️</div>
-							<h3 class="add-certificate-title">Death Certificate</h3>
-							<p class="add-certificate-description">Register a new death certificate with complete details</p>
+					@if (_birthCertificate is null)
+					{
+						<div class="add-certificate-card">
+							<div class="add-card-content">
+								<div class="add-certificate-icon">👶</div>
+								<h3 class="add-certificate-title">Birth Certificate</h3>
+								<p class="add-certificate-description">Register a new birth certificate with complete details</p>
+							</div>
+							<SfButton Content="Add Birth Certificate"
+									  CssClass="add-button primary-button"
+									  OnClick="NavigateToBirthCertificate" />
 						</div>
-						<SfButton Content="Add Death Certificate" 
-								  CssClass="add-button primary-button" 
-								  OnClick="NavigateToDeathCertificate" />
-					</div>
+					}
+
+					@if (_deathCertificate is null)
+					{
+						<div class="add-certificate-card">
+							<div class="add-card-content">
+								<div class="add-certificate-icon">🕊️</div>
+								<h3 class="add-certificate-title">Death Certificate</h3>
+								<p class="add-certificate-description">Register a new death certificate with complete details</p>
+							</div>
+							<SfButton Content="Add Death Certificate"
+									  CssClass="add-button primary-button"
+									  OnClick="NavigateToDeathCertificate" />
+						</div>
+					}
 				</div>
 			</div>
 		</div>

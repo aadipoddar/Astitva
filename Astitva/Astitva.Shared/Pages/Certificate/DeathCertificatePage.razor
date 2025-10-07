@@ -1,3 +1,279 @@
-﻿<h3>DeathCertificatePage</h3>
+﻿@page "/certificate/death"
+@using Astitva.Shared.Services
+@using AstitvaLibrary.Data
+@using AstitvaLibrary.DataAccess
+@using AstitvaLibrary.Models
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
 
+@inject IDataStorageService DataStorageService
+@inject INotificationService NotificationService
+@inject IVibrationService VibrationService
+@inject ISaveAndViewService SaveAndViewService
+@inject NavigationManager NavigationManager
 
+@if (_isLoading)
+{
+    <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading death certificate form...</p>
+    </div>
+}
+else
+{
+    <div class="certificate-form-container">
+        <div class="form-header">
+            <div class="header-content">
+                <h1 class="form-title">
+                    <i class="fas fa-certificate"></i>
+                    Death Certificate Application
+                </h1>
+                <p class="form-subtitle">Complete the details below to apply for a death certificate</p>
+            </div>
+        </div>
+
+        @if (_showValidationSummary && _validationErrors.Any())
+        {
+            <div class="validation-summary">
+                <div class="validation-header">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Please correct the following errors:</span>
+                </div>
+                <ul class="validation-list">
+                    @foreach (var error in _validationErrors.Values)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <div class="certificate-form">
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-user"></i>
+                    Personal Information
+                </h3>
+                
+                <div class="form-row">
+                    <div class="form-group @GetValidationClass("FirstName")">
+                        <label class="form-label required">First Name</label>
+                        <SfTextBox @bind-Value="_deathCertificateModel.FirstName"
+                                  Placeholder="Enter first name"
+                                  CssClass="@($"form-input {GetValidationClass("FirstName")}")" 
+                                  MaxLength="50" />
+                        @if (!string.IsNullOrEmpty(GetValidationMessage("FirstName")))
+                        {
+                            <span class="validation-message">@GetValidationMessage("FirstName")</span>
+                        }
+                    </div>
+
+                    <div class="form-group @GetValidationClass("MiddleName")">
+                        <label class="form-label">Middle Name</label>
+                        <SfTextBox @bind-Value="_deathCertificateModel.MiddleName"
+                                  Placeholder="Enter middle name (optional)"
+                                  CssClass="@($"form-input {GetValidationClass("MiddleName")}")" 
+                                  MaxLength="50" />
+                        @if (!string.IsNullOrEmpty(GetValidationMessage("MiddleName")))
+                        {
+                            <span class="validation-message">@GetValidationMessage("MiddleName")</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group @GetValidationClass("LastName")">
+                        <label class="form-label">Last Name</label>
+                        <SfTextBox @bind-Value="_deathCertificateModel.LastName"
+                                  Placeholder="Enter last name (optional)"
+                                  CssClass="@($"form-input {GetValidationClass("LastName")}")" 
+                                  MaxLength="50" />
+                        @if (!string.IsNullOrEmpty(GetValidationMessage("LastName")))
+                        {
+                            <span class="validation-message">@GetValidationMessage("LastName")</span>
+                        }
+                    </div>
+
+                    <div class="form-group @GetValidationClass("Sex")">
+                        <label class="form-label required">Sex</label>
+                        <SfComboBox TValue="string" TItem="string"
+                                   @bind-Value="_deathCertificateModel.Sex"
+                                   DataSource="@(new string[] { "Male", "Female", "Other" })"
+                                   Placeholder="Select sex"
+                                   CssClass="@($"form-input {GetValidationClass("Sex")}")" />
+                        @if (!string.IsNullOrEmpty(GetValidationMessage("Sex")))
+                        {
+                            <span class="validation-message">@GetValidationMessage("Sex")</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-heart-broken"></i>
+                    Death Information
+                </h3>
+                
+                <div class="form-row">
+                    <div class="form-group @GetValidationClass("DateOfDeath")">
+                        <label class="form-label required">Date of Death</label>
+                        <SfDatePicker TValue="DateOnly" @bind-Value="_deathCertificateModel.DateOfDeath"
+                                     Placeholder="Select date of death"
+                                     CssClass="@($"form-input {GetValidationClass("DateOfDeath")}")"
+                                     Max="@DateTime.Now"
+                                     Min="@DateTime.Now.AddYears(-150)" />
+                        @if (!string.IsNullOrEmpty(GetValidationMessage("DateOfDeath")))
+                        {
+                            <span class="validation-message">@GetValidationMessage("DateOfDeath")</span>
+                        }
+                    </div>
+
+                    <div class="form-group @GetValidationClass("DeathPlace")">
+                        <label class="form-label">Place of Death</label>
+                        <SfTextBox @bind-Value="_deathCertificateModel.DeathPlace"
+                                  Placeholder="Enter place of death (optional)"
+                                  CssClass="@($"form-input {GetValidationClass("DeathPlace")}")" 
+                                  MaxLength="200" />
+                        @if (!string.IsNullOrEmpty(GetValidationMessage("DeathPlace")))
+                        {
+                            <span class="validation-message">@GetValidationMessage("DeathPlace")</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-users"></i>
+                    Family Information
+                </h3>
+                
+                <div class="form-row">
+                    <div class="form-group @GetValidationClass("FatherName")">
+                        <label class="form-label">Father's Name</label>
+                        <SfTextBox @bind-Value="_deathCertificateModel.FatherName"
+                                  Placeholder="Enter father's name (optional)"
+                                  CssClass="@($"form-input {GetValidationClass("FatherName")}")" 
+                                  MaxLength="100" />
+                        @if (!string.IsNullOrEmpty(GetValidationMessage("FatherName")))
+                        {
+                            <span class="validation-message">@GetValidationMessage("FatherName")</span>
+                        }
+                    </div>
+
+                    <div class="form-group @GetValidationClass("MotherName")">
+                        <label class="form-label">Mother's Name</label>
+                        <SfTextBox @bind-Value="_deathCertificateModel.MotherName"
+                                  Placeholder="Enter mother's name (optional)"
+                                  CssClass="@($"form-input {GetValidationClass("MotherName")}")" 
+                                  MaxLength="100" />
+                        @if (!string.IsNullOrEmpty(GetValidationMessage("MotherName")))
+                        {
+                            <span class="validation-message">@GetValidationMessage("MotherName")</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Location Information
+                </h3>
+                
+                <div class="form-row">
+                    <div class="form-group @GetValidationClass("MunicipalityId")">
+                        <label class="form-label required">Municipality</label>
+                        <SfComboBox TValue="int" TItem="MunicipalityModel"
+                                   @bind-Value="_deathCertificateModel.MunicipalityId"
+                                   DataSource="_municipalities"
+                                   Placeholder="Select municipality"
+                                   CssClass="@($"form-input {GetValidationClass("MunicipalityId")}")">
+                            <ComboBoxFieldSettings Value="Id" Text="Name" />
+                        </SfComboBox>
+                        @if (!string.IsNullOrEmpty(GetValidationMessage("MunicipalityId")))
+                        {
+                            <span class="validation-message">@GetValidationMessage("MunicipalityId")</span>
+                        }
+                    </div>
+
+                    <div class="form-group @GetValidationClass("Address")">
+                        <label class="form-label">Address</label>
+                        <SfTextBox @bind-Value="_deathCertificateModel.Address"
+                                  Placeholder="Enter address (optional)"
+                                  CssClass="@($"form-input {GetValidationClass("Address")}")" 
+                                  MaxLength="500"
+                                  Multiline="true" />
+                        @if (!string.IsNullOrEmpty(GetValidationMessage("Address")))
+                        {
+                            <span class="validation-message">@GetValidationMessage("Address")</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-calendar-check"></i>
+                    Registration Information
+                </h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Registration Date</label>
+                        <SfDatePicker TValue="DateOnly" @bind-Value="_deathCertificateModel.RegistrationDate"
+                                     Placeholder="Registration date"
+                                     CssClass="form-input"
+                                     Readonly="true" />
+                        <small class="form-help-text">This will be set automatically when you save the certificate.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <div class="action-buttons">
+                    <SfButton CssClass="secondary-button"
+                             @onclick="CancelForm"
+                             Disabled="_isSaving">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </SfButton>
+
+                    <SfButton CssClass="outline-button"
+                             @onclick="ClearForm"
+                             Disabled="_isSaving">
+                        <i class="fas fa-eraser"></i>
+                        Clear Form
+                    </SfButton>
+
+                    @if (_deathCertificateModel.Id > 0)
+                    {
+                        <SfButton CssClass="download-button"
+                                 @onclick="DownloadCertificate"
+                                 Disabled="_isSaving">
+                            <i class="fas fa-download"></i>
+                            Download Certificate
+                        </SfButton>
+                    }
+
+                    <SfButton CssClass="@GetButtonClass()"
+                             @onclick="SaveDetails"
+                             Disabled="_isSaving">
+                        @if (_isSaving)
+                        {
+                            <i class="fas fa-spinner fa-spin"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-save"></i>
+                        }
+                        @GetButtonContent()
+                    </SfButton>
+                </div>
+            </div>
+        </div>
+    </div>
+}

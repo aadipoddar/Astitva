@@ -5,6 +5,7 @@ public static class TableNames
 	public static string User => "User";
 	public static string BirthCertificate => "BirthCertificate";
 	public static string DeathCertificate => "DeathCertificate";
+	public static string Municipality => "Municipality";
 }
 
 public static class StoredProcedureNames
