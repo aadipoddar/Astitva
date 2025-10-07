@@ -6,3 +6,20 @@
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
+
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Buttons
+
+@using Astitva.Shared.Services
+
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+@inject IFormFactor FormFactor
+@inject ISaveAndViewService SaveAndViewService
+@inject IDataStorageService DataStorageService
+@inject IVibrationService VibrationService
+@inject ISoundService SoundService
+@inject IUpdateService UpdateService
+@inject INotificationService NotificationService
