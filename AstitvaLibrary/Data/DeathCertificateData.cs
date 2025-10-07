@@ -1,4 +1,7 @@
-﻿namespace AstitvaLibrary.Data;
+﻿using AstitvaLibrary.DataAccess;
+using AstitvaLibrary.Models;
+
+namespace AstitvaLibrary.Data;
 
 public static class DeathCertificateData
 {
@@ -7,4 +10,7 @@ public static class DeathCertificateData
 
 	public static async Task<Models.DeathCertificateModel> LoadDeathCertificateByUser(int UserId) =>
 		(await DataAccess.SqlDataAccess.LoadData<Models.DeathCertificateModel, dynamic>(DataAccess.StoredProcedureNames.LoadDeathCertificateByUser, new { UserId })).FirstOrDefault();
+
+	public static async Task<DeathCertificateOverviewModel> LoadDeathCertificateOverviewByUser(int UserId) =>
+		(await SqlDataAccess.LoadData<DeathCertificateOverviewModel, dynamic>(StoredProcedureNames.LoadDeathCertificateOverviewByUser, new { UserId })).FirstOrDefault();
 }

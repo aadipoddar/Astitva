@@ -77,6 +77,10 @@
     <Build Include="StoredProcedures\LoadData\Load_User_By_Number.sql" />
     <Build Include="StoredProcedures\LoadData\Load_BirthCertificate_By_User.sql" />
     <Build Include="StoredProcedures\LoadData\Load_DeathCertificate_By_User.sql" />
+    <Build Include="Views\BirthCertificate_Overview.sql" />
+    <Build Include="StoredProcedures\LoadData\Load_BirthCertificateOverview_By_User.sql" />
+    <Build Include="Views\DeathCertificate_Overview.sql" />
+    <Build Include="StoredProcedures\LoadData\Load_DeathCertificateOverview_By_User.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\DBAstitva.publish.xml" />

@@ -10,4 +10,7 @@ public static class BirthCertificateData
 
 	public static async Task<BirthCertificateModel> LoadBirthCertificateByUser(int UserId) =>
 		(await SqlDataAccess.LoadData<BirthCertificateModel, dynamic>(StoredProcedureNames.LoadBirthCertificateByUser, new { UserId })).FirstOrDefault();
+
+	public static async Task<BirthCertificateOverviewModel> LoadBirthCertificateOverviewByUser(int UserId) =>
+		(await SqlDataAccess.LoadData<BirthCertificateOverviewModel, dynamic>(StoredProcedureNames.LoadBirthCertificateOverviewByUser, new { UserId })).FirstOrDefault();
 }

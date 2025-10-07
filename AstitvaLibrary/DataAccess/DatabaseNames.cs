@@ -16,6 +16,8 @@ public static class StoredProcedureNames
 	public static string LoadUserByNumber => "Load_User_By_Number";
 	public static string LoadBirthCertificateByUser => "Load_BirthCertificate_By_User";
 	public static string LoadDeathCertificateByUser => "Load_DeathCertificate_By_User";
+	public static string LoadBirthCertificateOverviewByUser => "Load_BirthCertificateOverview_By_User";
+	public static string LoadDeathCertificateOverviewByUser => "Load_DeathCertificateOverview_By_User";
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertBirthCertificate => "Insert_BirthCertificate";
@@ -24,4 +26,6 @@ public static class StoredProcedureNames
 
 public static class ViewNames
 {
+	public static string BirthCertificateOverview => "BirthCertificate_Overview";
+	public static string DeathCertificateOverview => "DeathCertificate_Overview";
 }
