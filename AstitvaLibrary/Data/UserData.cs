@@ -1,7 +1,7 @@
 ﻿using AstitvaLibrary.DataAccess;
-using AstitvaLibrary.Models.Common;
+using AstitvaLibrary.Models;
 
-namespace AstitvaLibrary.Data.Common;
+namespace AstitvaLibrary.Data;
 
 public static class UserData
 {

@@ -1,6 +1,6 @@
 ﻿using Astitva.Shared.Services;
 
-using AstitvaLibrary.Data.Common;
+using AstitvaLibrary.Data;
 
 namespace Astitva.Services;
 
@@ -20,6 +20,8 @@ public class DataStorageService : IDataStorageService
 		SecureStorage.Default.RemoveAll();
 
 		await LocalRemove(StorageFileNames.UserDataFileName);
+		await LocalRemove(StorageFileNames.BirthCertificateFileName);
+		await LocalRemove(StorageFileNames.DeathCertificateFileName);
 	}
 
 

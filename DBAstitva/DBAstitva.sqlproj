@@ -60,19 +60,23 @@
     <Folder Include="Tables" />
     <Folder Include="PublishLocations" />
     <Folder Include="StoredProcedures\LoadData" />
-    <Folder Include="StoredProcedures\LoadData\Common" />
     <Folder Include="StoredProcedures\Insert" />
-    <Folder Include="StoredProcedures\Insert\Common" />
+    <Folder Include="Views" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\User.sql" />
-    <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
-    <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Id.sql" />
-    <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Status.sql" />
-    <Build Include="StoredProcedures\LoadData\Common\Load_User_By_Number.sql" />
-    <Build Include="StoredProcedures\Insert\Common\Insert_User.sql" />
     <Build Include="Tables\BirthCertificate.sql" />
     <Build Include="Tables\Municipality.sql" />
+    <Build Include="Tables\DeathCertificate.sql" />
+    <Build Include="StoredProcedures\Insert\Insert_User.sql" />
+    <Build Include="StoredProcedures\Insert\Insert_BirthCertificate.sql" />
+    <Build Include="StoredProcedures\Insert\Insert_DeathCertificate.sql" />
+    <Build Include="StoredProcedures\LoadData\Load_TableData.sql" />
+    <Build Include="StoredProcedures\LoadData\Load_TableData_By_Id.sql" />
+    <Build Include="StoredProcedures\LoadData\Load_TableData_By_Status.sql" />
+    <Build Include="StoredProcedures\LoadData\Load_User_By_Number.sql" />
+    <Build Include="StoredProcedures\LoadData\Load_BirthCertificate_By_User.sql" />
+    <Build Include="StoredProcedures\LoadData\Load_DeathCertificate_By_User.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\DBAstitva.publish.xml" />

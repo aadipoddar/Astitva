@@ -1,8 +1,8 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace Astitva
-{
+namespace Astitva;
+
     public class Program
     {
         // This is the main entry point of the application.
@@ -13,4 +13,3 @@ namespace Astitva
             UIApplication.Main(args, null, typeof(AppDelegate));
         }
     }
-}

@@ -1,5 +1,5 @@
-﻿using AstitvaLibrary.Data.Common;
-using AstitvaLibrary.Models.Common;
+﻿using AstitvaLibrary.Data;
+using AstitvaLibrary.Models;
 
 using Microsoft.AspNetCore.Components;
 

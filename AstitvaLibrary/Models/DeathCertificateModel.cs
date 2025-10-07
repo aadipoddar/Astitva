@@ -1,18 +1,18 @@
 ﻿namespace AstitvaLibrary.Models;
 
-public class BirthCertificateModel
+public class DeathCertificateModel
 {
 	public int Id { get; set; }
 	public string FirstName { get; set; }
 	public string? MiddleName { get; set; }
 	public string? LastName { get; set; }
-	public DateOnly DateOfBirth { get; set; }
+	public DateOnly DateOfDeath { get; set; }
 	public string Sex { get; set; }
 	public string? FatherName { get; set; }
 	public string? MotherName { get; set; }
 	public int? RegistrationNo { get; set; }
 	public DateOnly RegistrationDate { get; set; }
-	public string? BirthPlace { get; set; }
+	public string? DeathPlace { get; set; }
 	public string? Address { get; set; }
 	public int MunicipalityId { get; set; }
 	public int UserId { get; set; }

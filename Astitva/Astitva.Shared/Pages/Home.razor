@@ -1,11 +1,166 @@
 ﻿@page "/"
 @using Astitva.Shared.Services
 @inject IFormFactor FormFactor
+@inject ISaveAndViewService SaveAndViewService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Astitva - Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="home-page-wrapper">
+	<div class="home-background">
+		<div class="floating-shapes">
+			<div class="shape shape-1"></div>
+			<div class="shape shape-2"></div>
+			<div class="shape shape-3"></div>
+			<div class="shape shape-4"></div>
+			<div class="shape shape-5"></div>
+		</div>
+	</div>
 
-Welcome to your new app running on <em>@factor</em> using <em>@platform</em>.
+	<div class="home-container">
+		<!-- Header Section -->
+		<div class="home-header">
+			<div class="welcome-section">
+				<div class="app-logo">
+					<div class="logo-icon">📋</div>
+				</div>
+				<h1 class="welcome-title">Welcome to Astitva</h1>
+				<p class="welcome-subtitle">Your Digital Certificate Manager</p>
+			</div>
+			
+			<div class="user-actions">
+				<SfButton Content="Log Out" 
+						  CssClass="logout-button" 
+						  OnClick="Logout" />
+			</div>
+		</div>
 
-<SfButton Content="Log Out" OnClick="Logout" />
+		<!-- Main Content -->
+		<div class="home-content">
+			@if (_isLoading)
+			{
+				<div class="loading-container">
+					<div class="loading-spinner"></div>
+					<p class="loading-text">Loading your certificates...</p>
+				</div>
+			}
+			else if (HasCertificates)
+			{
+				<div class="certificates-section">
+					<h2 class="section-title">Your Certificates</h2>
+					<div class="certificates-grid">
+						@if (_birthCertificate is not null)
+						{
+							<div class="certificate-card birth-certificate">
+								<div class="card-header">
+									<div class="certificate-icon">👶</div>
+									<div class="certificate-type">Birth Certificate</div>
+								</div>
+								<div class="card-content">
+									<h3 class="certificate-name">@GetFullName(_birthCertificate.FirstName, _birthCertificate.MiddleName, _birthCertificate.LastName)</h3>
+									<div class="certificate-details">
+										<div class="detail-item">
+											<span class="detail-label">Date of Birth:</span>
+											<span class="detail-value">@_birthCertificate.DateOfBirth.ToString("dd MMM yyyy")</span>
+										</div>
+										<div class="detail-item">
+											<span class="detail-label">Registration No:</span>
+											<span class="detail-value">@_birthCertificate.RegistrationNo</span>
+										</div>
+									</div>
+								</div>
+								<div class="card-actions">
+									<SfButton Content="Download" 
+											  CssClass="download-button primary-button" 
+											  OnClick="DownloadBirthCertificate" />
+									<SfButton Content="Edit" 
+											  CssClass="edit-button secondary-button" 
+											  OnClick="NavigateToBirthCertificate" />
+								</div>
+							</div>
+						}
+
+						@if (_deathCertificate is not null)
+						{
+							<div class="certificate-card death-certificate">
+								<div class="card-header">
+									<div class="certificate-icon">🕊️</div>
+									<div class="certificate-type">Death Certificate</div>
+								</div>
+								<div class="card-content">
+									<h3 class="certificate-name">@GetFullName(_deathCertificate.FirstName, _deathCertificate.MiddleName, _deathCertificate.LastName)</h3>
+									<div class="certificate-details">
+										<div class="detail-item">
+											<span class="detail-label">Date of Death:</span>
+											<span class="detail-value">@_deathCertificate.DateOfDeath.ToString("dd MMM yyyy")</span>
+										</div>
+										@if (_deathCertificate.RegistrationNo.HasValue)
+										{
+											<div class="detail-item">
+												<span class="detail-label">Registration No:</span>
+												<span class="detail-value">@_deathCertificate.RegistrationNo</span>
+											</div>
+										}
+									</div>
+								</div>
+								<div class="card-actions">
+									<SfButton Content="Download" 
+											  CssClass="download-button primary-button" 
+											  OnClick="DownloadDeathCertificate" />
+									<SfButton Content="Edit" 
+											  CssClass="edit-button secondary-button" 
+											  OnClick="NavigateToDeathCertificate" />
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			}
+			else
+			{
+				<div class="no-certificates-section">
+					<div class="empty-state">
+						<div class="empty-icon">📄</div>
+						<h2 class="empty-title">No Certificates Found</h2>
+						<p class="empty-description">Start by adding your certificate details to get started with digital certificate management.</p>
+					</div>
+				</div>
+			}
+
+			<!-- Add Certificate Section -->
+			<div class="add-certificates-section">
+				<h2 class="section-title">Add New Certificate</h2>
+				<div class="add-certificates-grid">
+					<div class="add-certificate-card">
+						<div class="add-card-content">
+							<div class="add-certificate-icon">👶</div>
+							<h3 class="add-certificate-title">Birth Certificate</h3>
+							<p class="add-certificate-description">Register a new birth certificate with complete details</p>
+						</div>
+						<SfButton Content="Add Birth Certificate" 
+								  CssClass="add-button primary-button" 
+								  OnClick="NavigateToBirthCertificate" />
+					</div>
+
+					<div class="add-certificate-card">
+						<div class="add-card-content">
+							<div class="add-certificate-icon">🕊️</div>
+							<h3 class="add-certificate-title">Death Certificate</h3>
+							<p class="add-certificate-description">Register a new death certificate with complete details</p>
+						</div>
+						<SfButton Content="Add Death Certificate" 
+								  CssClass="add-button primary-button" 
+								  OnClick="NavigateToDeathCertificate" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	private string GetFullName(string firstName, string middleName, string lastName)
+	{
+		var parts = new[] { firstName, middleName, lastName }.Where(p => !string.IsNullOrWhiteSpace(p));
+		return string.Join(" ", parts);
+	}
+}

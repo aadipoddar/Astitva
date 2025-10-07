@@ -1,10 +1,9 @@
 ﻿using Foundation;
 
-namespace Astitva
-{
+namespace Astitva;
+
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate
     {
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
     }
-}

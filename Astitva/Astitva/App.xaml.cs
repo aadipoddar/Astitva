@@ -1,5 +1,5 @@
-﻿namespace Astitva
-{
+﻿namespace Astitva;
+
     public partial class App : Application
     {
         public App()
@@ -12,4 +12,3 @@
             return new Window(new MainPage()) { Title = "Astitva" };
         }
     }
-}

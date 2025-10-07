@@ -1,8 +1,8 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace Astitva
-{
+namespace Astitva;
+
     [Application]
     public class MainApplication : MauiApplication
     {
@@ -13,4 +13,3 @@ namespace Astitva
 
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
     }
-}

@@ -1,11 +1,8 @@
-using AstitvaLibrary.Data.Common;
-using Astitva.Shared.Services;
+using AstitvaLibrary.Data;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
-
-using Syncfusion.Blazor.Inputs;
 
 namespace Astitva.Shared.Pages.Authentication;
 
@@ -45,14 +42,14 @@ public partial class OtpPage : IDisposable
 	private async Task HandleInput(ChangeEventArgs e, int index)
 	{
 		var value = e.Value?.ToString() ?? "";
-		
+
 		// Only allow digits
 		if (!string.IsNullOrEmpty(value) && !char.IsDigit(value[0]))
 			return;
 
 		_hasError = false;
 		_otpDigits[index] = string.IsNullOrEmpty(value) ? "" : value.Substring(0, 1);
-		
+
 		// Move to next input if digit entered
 		if (!string.IsNullOrEmpty(_otpDigits[index]) && index < 5)
 		{
@@ -129,7 +126,7 @@ public partial class OtpPage : IDisposable
 				_isVerifying = false;
 				ClearOTP();
 				StateHasChanged();
-				
+
 				// Clear error after 3 seconds
 				await Task.Delay(3000);
 				_hasError = false;
@@ -166,14 +163,14 @@ public partial class OtpPage : IDisposable
 				_isSuccess = true;
 				_isVerifying = false;
 				StateHasChanged();
-				
+
 				// Save user data
 				await DataStorageService.SecureSaveAsync(StorageFileNames.UserDataFileName, System.Text.Json.JsonSerializer.Serialize(user));
 				VibrationService.VibrateWithTime(500);
-				
+
 				// Wait a bit to show success animation
 				await Task.Delay(2500);
-				
+
 				NavigationManager.NavigateTo("/");
 			}
 		}
@@ -202,19 +199,19 @@ public partial class OtpPage : IDisposable
 		_hasError = false;
 		_canResend = false;
 		_timeRemaining = 300; // Reset to 5 minutes
-		
+
 		// Restart the timer
 		_timer?.Dispose();
 		_timer = new Timer(UpdateTimer, null, 0, 1000);
-		
+
 		StateHasChanged();
-		
+
 		// Add haptic feedback
 		VibrationService.VibrateHapticClick();
-		
+
 		// Simulate resend delay
 		await Task.Delay(500);
-		
+
 		// In a real app, you would call an API to resend the OTP
 		// For now, just show feedback that it was sent
 	}
