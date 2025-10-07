@@ -21,22 +21,13 @@ public partial class DeathCertificatePage
 
 	protected override async Task OnInitializedAsync()
 	{
-		try
-		{
-			var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
-			_user = authResult.User;
-			await LoadData();
-			await LoadExistingCertificate();
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(1, "Error", "Loading Failed", $"Failed to load form: {ex.Message}");
-		}
-		finally
-		{
-			_isLoading = false;
-			StateHasChanged();
-		}
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
+		_user = authResult.User;
+		await LoadData();
+		await LoadExistingCertificate();
+
+		_isLoading = false;
+		StateHasChanged();
 	}
 
 	private async Task LoadData()
@@ -133,57 +124,36 @@ public partial class DeathCertificatePage
 		_isSaving = true;
 		StateHasChanged();
 
-		try
-		{
-			// Set system fields
-			_deathCertificateModel.UserId = _user.Id;
-			_deathCertificateModel.Status = true;
-			_deathCertificateModel.Approved = false;
-			_deathCertificateModel.RegistrationDate = DateOnly.FromDateTime(DateTime.Now);
+		// Set system fields
+		_deathCertificateModel.UserId = _user.Id;
+		_deathCertificateModel.Status = true;
+		_deathCertificateModel.Approved = false;
+		_deathCertificateModel.RegistrationDate = DateOnly.FromDateTime(DateTime.Now);
 
-			// Clean optional fields
-			_deathCertificateModel.MiddleName = string.IsNullOrWhiteSpace(_deathCertificateModel.MiddleName) ? null : _deathCertificateModel.MiddleName.Trim();
-			_deathCertificateModel.LastName = string.IsNullOrWhiteSpace(_deathCertificateModel.LastName) ? null : _deathCertificateModel.LastName.Trim();
-			_deathCertificateModel.FatherName = string.IsNullOrWhiteSpace(_deathCertificateModel.FatherName) ? null : _deathCertificateModel.FatherName.Trim();
-			_deathCertificateModel.MotherName = string.IsNullOrWhiteSpace(_deathCertificateModel.MotherName) ? null : _deathCertificateModel.MotherName.Trim();
-			_deathCertificateModel.DeathPlace = string.IsNullOrWhiteSpace(_deathCertificateModel.DeathPlace) ? null : _deathCertificateModel.DeathPlace.Trim();
-			_deathCertificateModel.Address = string.IsNullOrWhiteSpace(_deathCertificateModel.Address) ? null : _deathCertificateModel.Address.Trim();
+		// Clean optional fields
+		_deathCertificateModel.MiddleName = string.IsNullOrWhiteSpace(_deathCertificateModel.MiddleName) ? null : _deathCertificateModel.MiddleName.Trim();
+		_deathCertificateModel.LastName = string.IsNullOrWhiteSpace(_deathCertificateModel.LastName) ? null : _deathCertificateModel.LastName.Trim();
+		_deathCertificateModel.FatherName = string.IsNullOrWhiteSpace(_deathCertificateModel.FatherName) ? null : _deathCertificateModel.FatherName.Trim();
+		_deathCertificateModel.MotherName = string.IsNullOrWhiteSpace(_deathCertificateModel.MotherName) ? null : _deathCertificateModel.MotherName.Trim();
+		_deathCertificateModel.DeathPlace = string.IsNullOrWhiteSpace(_deathCertificateModel.DeathPlace) ? null : _deathCertificateModel.DeathPlace.Trim();
+		_deathCertificateModel.Address = string.IsNullOrWhiteSpace(_deathCertificateModel.Address) ? null : _deathCertificateModel.Address.Trim();
 
-			await DeathCertificateData.InsertDeathCertificate(_deathCertificateModel);
+		await DeathCertificateData.InsertDeathCertificate(_deathCertificateModel);
 
-			// Save to local storage for backup
-			await DataStorageService.LocalSaveAsync(StorageFileNames.DeathCertificateFileName,
-				System.Text.Json.JsonSerializer.Serialize(_deathCertificateModel));
+		// Save to local storage for backup
+		await DataStorageService.LocalSaveAsync(StorageFileNames.DeathCertificateFileName,
+			System.Text.Json.JsonSerializer.Serialize(_deathCertificateModel));
 
-			// Generate and save certificate
-			await GenerateAndSaveCertificate();
+		// Generate and save certificate
+		await GenerateAndSaveCertificate();
 
-			VibrationService.VibrateHapticClick();
+		VibrationService.VibrateHapticClick();
 
-			await NotificationService.ShowLocalNotification(
-				1,
-				"Success",
-				"Death Certificate Saved",
-				"Your death certificate application has been submitted and certificate generated successfully!");
+		// Navigate back to home
+		NavigationManager.NavigateTo("/");
 
-			// Navigate back to home
-			NavigationManager.NavigateTo("/");
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(
-				2,
-				"Error",
-				"Save Failed",
-				$"Failed to save certificate: {ex.Message}");
-
-			VibrationService.VibrateWithTime(500);
-		}
-		finally
-		{
-			_isSaving = false;
-			StateHasChanged();
-		}
+		_isSaving = false;
+		StateHasChanged();
 	}
 
 	private void CancelForm()
@@ -229,75 +199,33 @@ public partial class DeathCertificatePage
 
 	private async Task GenerateAndSaveCertificate()
 	{
-		try
-		{
-			var certificate = await DeathCertificateData.LoadDeathCertificateOverviewByUser(_deathCertificateModel.UserId);
+		var certificate = await DeathCertificateData.LoadDeathCertificateOverviewByUser(_deathCertificateModel.UserId);
 
-			// Generate professional PDF certificate
-			using var certificateStream = DeathCertificatePDFExport.GenerateDeathCertificate(certificate, _user);
+		// Generate professional PDF certificate
+		using var certificateStream = DeathCertificatePDFExport.GenerateDeathCertificate(certificate, _user);
 
-			// Generate filename
-			var fileName = DeathCertificatePDFExport.GenerateFileName(certificate, _user);
+		// Generate filename
+		var fileName = DeathCertificatePDFExport.GenerateFileName(certificate, _user);
 
-			// Save certificate as PDF
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
-
-			await NotificationService.ShowLocalNotification(
-				10,
-				"Certificate Generated",
-				"Download Complete",
-				"Your professional death certificate PDF has been generated and saved successfully!");
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(
-				11,
-				"Warning",
-				"Certificate Generation Failed",
-				$"Certificate saved but PDF generation failed: {ex.Message}");
-		}
+		// Save certificate as PDF
+		await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
 	}
 
 	private async Task DownloadCertificate()
 	{
 		if (_deathCertificateModel.Id <= 0) return;
 
-		try
-		{
-			await NotificationService.ShowLocalNotification(
-				12,
-				"Download",
-				"Generating Certificate",
-				"Generating your professional death certificate PDF for download...");
+		var certificate = await DeathCertificateData.LoadDeathCertificateOverviewByUser(_deathCertificateModel.UserId);
 
-			var certificate = await DeathCertificateData.LoadDeathCertificateOverviewByUser(_deathCertificateModel.UserId);
+		// Generate professional PDF certificate
+		using var certificateStream = DeathCertificatePDFExport.GenerateDeathCertificate(certificate, _user);
 
-			// Generate professional PDF certificate
-			using var certificateStream = DeathCertificatePDFExport.GenerateDeathCertificate(certificate, _user);
+		// Generate filename
+		var fileName = DeathCertificatePDFExport.GenerateFileName(certificate, _user);
 
-			// Generate filename
-			var fileName = DeathCertificatePDFExport.GenerateFileName(certificate, _user);
+		// Save certificate as PDF
+		await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
 
-			// Save certificate as PDF
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
-
-			VibrationService.VibrateHapticClick();
-
-			await NotificationService.ShowLocalNotification(
-				13,
-				"Success",
-				"Download Complete",
-				"Your professional death certificate PDF has been downloaded successfully!");
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(
-				14,
-				"Error",
-				"Download Failed",
-				$"Failed to download certificate: {ex.Message}");
-
-			VibrationService.VibrateWithTime(500);
-		}
+		VibrationService.VibrateHapticClick();
 	}
 }

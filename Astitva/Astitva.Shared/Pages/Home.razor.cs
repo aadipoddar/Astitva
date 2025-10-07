@@ -25,6 +25,9 @@ public partial class Home
 		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
 		_user = authResult.User;
 
+		if (_user is null)
+			return;
+
 		await LoadData();
 		_isLoading = false;
 		StateHasChanged();
@@ -45,7 +48,11 @@ public partial class Home
 		}
 		catch (Exception ex)
 		{
-			await NotificationService.ShowLocalNotification(1, "Error", "Loading Certificates", $"Error loading certificates: {ex.Message}");
+			if (await DataStorageService.LocalExists(StorageFileNames.BirthCertificateFileName))
+				_birthCertificate = System.Text.Json.JsonSerializer.Deserialize<BirthCertificateOverviewModel>(await DataStorageService.LocalGetAsync(StorageFileNames.BirthCertificateFileName));
+
+			if (await DataStorageService.LocalExists(StorageFileNames.DeathCertificateFileName))
+				_deathCertificate = System.Text.Json.JsonSerializer.Deserialize<DeathCertificateOverviewModel>(await DataStorageService.LocalGetAsync(StorageFileNames.DeathCertificateFileName));
 		}
 	}
 
@@ -55,55 +62,33 @@ public partial class Home
 	{
 		if (_birthCertificate is null) return;
 
-		try
-		{
-			await NotificationService.ShowLocalNotification(2, "Download", "Birth Certificate", "Generating professional birth certificate PDF...");
+		// Generate professional PDF certificate
+		using var certificateStream = BirthCertificatePDFExport.GenerateBirthCertificate(_birthCertificate, _user);
 
-			// Generate professional PDF certificate
-			using var certificateStream = BirthCertificatePDFExport.GenerateBirthCertificate(_birthCertificate, _user);
+		// Generate filename
+		var fileName = BirthCertificatePDFExport.GenerateFileName(_birthCertificate, _user);
 
-			// Generate filename
-			var fileName = BirthCertificatePDFExport.GenerateFileName(_birthCertificate, _user);
+		// Save certificate as PDF
+		await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
 
-			// Save certificate as PDF
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
-
-			VibrationService.VibrateWithTime(200);
-			await NotificationService.ShowLocalNotification(6, "Success", "Download Complete", "Professional birth certificate PDF downloaded successfully!");
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(3, "Error", "Download Failed", $"Failed to download: {ex.Message}");
-		}
+		VibrationService.VibrateWithTime(200);
 	}
 
 	private async Task DownloadDeathCertificate()
 	{
 		if (_deathCertificate is null) return;
 
-		try
-		{
-			await NotificationService.ShowLocalNotification(4, "Download", "Death Certificate", "Generating professional death certificate PDF...");
+		// Generate professional PDF certificate
+		using var certificateStream = DeathCertificatePDFExport.GenerateDeathCertificate(_deathCertificate, _user);
 
-			// Generate professional PDF certificate
-			using var certificateStream = DeathCertificatePDFExport.GenerateDeathCertificate(_deathCertificate, _user);
+		// Generate filename
+		var fileName = DeathCertificatePDFExport.GenerateFileName(_deathCertificate, _user);
 
-			// Generate filename
-			var fileName = DeathCertificatePDFExport.GenerateFileName(_deathCertificate, _user);
+		// Save certificate as PDF
+		await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
 
-			// Save certificate as PDF
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", certificateStream);
-
-			VibrationService.VibrateWithTime(200);
-			await NotificationService.ShowLocalNotification(7, "Success", "Download Complete", "Professional death certificate PDF downloaded successfully!");
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(5, "Error", "Download Failed", $"Failed to download: {ex.Message}");
-		}
+		VibrationService.VibrateWithTime(200);
 	}
-
-
 
 	private void NavigateToBirthCertificate() => NavigationManager.NavigateTo("/certificate/birth");
 	private void NavigateToDeathCertificate() => NavigationManager.NavigateTo("/certificate/death");

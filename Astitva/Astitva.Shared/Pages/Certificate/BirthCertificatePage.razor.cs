@@ -31,22 +31,13 @@ public partial class BirthCertificatePage
 
 	protected override async Task OnInitializedAsync()
 	{
-		try
-		{
-			var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
-			_user = authResult.User;
-			await LoadData();
-			await LoadExistingCertificate();
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(1, "Error", "Loading Failed", $"Failed to load form: {ex.Message}");
-		}
-		finally
-		{
-			_isLoading = false;
-			StateHasChanged();
-		}
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
+		_user = authResult.User;
+		await LoadData();
+		await LoadExistingCertificate();
+
+		_isLoading = false;
+		StateHasChanged();
 	}
 
 	private async Task LoadData()
@@ -147,57 +138,36 @@ public partial class BirthCertificatePage
 		_isSaving = true;
 		StateHasChanged();
 
-		try
-		{
-			// Set system fields
-			_birthCertificateModel.UserId = _user.Id;
-			_birthCertificateModel.Status = true;
-			_birthCertificateModel.Approved = false;
-			_birthCertificateModel.RegistrationDate = DateOnly.FromDateTime(DateTime.Now);
+		// Set system fields
+		_birthCertificateModel.UserId = _user.Id;
+		_birthCertificateModel.Status = true;
+		_birthCertificateModel.Approved = false;
+		_birthCertificateModel.RegistrationDate = DateOnly.FromDateTime(DateTime.Now);
 
-			// Clean optional fields
-			_birthCertificateModel.MiddleName = string.IsNullOrWhiteSpace(_birthCertificateModel.MiddleName) ? null : _birthCertificateModel.MiddleName.Trim();
-			_birthCertificateModel.LastName = string.IsNullOrWhiteSpace(_birthCertificateModel.LastName) ? null : _birthCertificateModel.LastName.Trim();
-			_birthCertificateModel.FatherName = string.IsNullOrWhiteSpace(_birthCertificateModel.FatherName) ? null : _birthCertificateModel.FatherName.Trim();
-			_birthCertificateModel.MotherName = string.IsNullOrWhiteSpace(_birthCertificateModel.MotherName) ? null : _birthCertificateModel.MotherName.Trim();
-			_birthCertificateModel.BirthPlace = string.IsNullOrWhiteSpace(_birthCertificateModel.BirthPlace) ? null : _birthCertificateModel.BirthPlace.Trim();
-			_birthCertificateModel.Address = string.IsNullOrWhiteSpace(_birthCertificateModel.Address) ? null : _birthCertificateModel.Address.Trim();
+		// Clean optional fields
+		_birthCertificateModel.MiddleName = string.IsNullOrWhiteSpace(_birthCertificateModel.MiddleName) ? null : _birthCertificateModel.MiddleName.Trim();
+		_birthCertificateModel.LastName = string.IsNullOrWhiteSpace(_birthCertificateModel.LastName) ? null : _birthCertificateModel.LastName.Trim();
+		_birthCertificateModel.FatherName = string.IsNullOrWhiteSpace(_birthCertificateModel.FatherName) ? null : _birthCertificateModel.FatherName.Trim();
+		_birthCertificateModel.MotherName = string.IsNullOrWhiteSpace(_birthCertificateModel.MotherName) ? null : _birthCertificateModel.MotherName.Trim();
+		_birthCertificateModel.BirthPlace = string.IsNullOrWhiteSpace(_birthCertificateModel.BirthPlace) ? null : _birthCertificateModel.BirthPlace.Trim();
+		_birthCertificateModel.Address = string.IsNullOrWhiteSpace(_birthCertificateModel.Address) ? null : _birthCertificateModel.Address.Trim();
 
-			await BirthCertificateData.InsertBirthCertificate(_birthCertificateModel);
+		await BirthCertificateData.InsertBirthCertificate(_birthCertificateModel);
 
-			// Save to local storage for backup
-			await DataStorageService.LocalSaveAsync(StorageFileNames.BirthCertificateFileName,
-				System.Text.Json.JsonSerializer.Serialize(_birthCertificateModel));
+		// Save to local storage for backup
+		await DataStorageService.LocalSaveAsync(StorageFileNames.BirthCertificateFileName,
+			System.Text.Json.JsonSerializer.Serialize(_birthCertificateModel));
 
-			// Generate and save certificate
-			await GenerateAndSaveCertificate();
+		// Generate and save certificate
+		await GenerateAndSaveCertificate();
 
-			VibrationService.VibrateHapticClick();
+		VibrationService.VibrateHapticClick();
 
-			await NotificationService.ShowLocalNotification(
-				1,
-				"Success",
-				"Birth Certificate Saved",
-				"Your birth certificate application has been submitted and certificate generated successfully!");
+		// Navigate back to home
+		NavigationManager.NavigateTo("/");
 
-			// Navigate back to home
-			NavigationManager.NavigateTo("/");
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(
-				2,
-				"Error",
-				"Save Failed",
-				$"Failed to save certificate: {ex.Message}");
-
-			VibrationService.VibrateWithTime(500);
-		}
-		finally
-		{
-			_isSaving = false;
-			StateHasChanged();
-		}
+		_isSaving = false;
+		StateHasChanged();
 	}
 
 	private void CancelForm()
@@ -243,75 +213,33 @@ public partial class BirthCertificatePage
 
 	private async Task GenerateAndSaveCertificate()
 	{
-		try
-		{
-			var birthCertificate = await BirthCertificateData.LoadBirthCertificateOverviewByUser(_birthCertificateModel.UserId);
+		var birthCertificate = await BirthCertificateData.LoadBirthCertificateOverviewByUser(_birthCertificateModel.UserId);
 
-			// Generate certificate content
-			using var certificateStream = BirthCertificatePDFExport.GenerateBirthCertificate(birthCertificate, _user);
+		// Generate certificate content
+		using var certificateStream = BirthCertificatePDFExport.GenerateBirthCertificate(birthCertificate, _user);
 
-			// Generate filename
-			var fileName = BirthCertificatePDFExport.GenerateFileName(birthCertificate, _user);
+		// Generate filename
+		var fileName = BirthCertificatePDFExport.GenerateFileName(birthCertificate, _user);
 
-			// Save certificate
-			await SaveAndViewService.SaveAndView(fileName, "text/plain", certificateStream);
-
-			await NotificationService.ShowLocalNotification(
-				10,
-				"Certificate Generated",
-				"Download Complete",
-				"Your birth certificate has been generated and saved successfully!");
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(
-				11,
-				"Warning",
-				"Certificate Generation Failed",
-				$"Certificate saved but generation failed: {ex.Message}");
-		}
+		// Save certificate
+		await SaveAndViewService.SaveAndView(fileName, "text/plain", certificateStream);
 	}
 
 	private async Task DownloadCertificate()
 	{
 		if (_birthCertificateModel.Id <= 0) return;
 
-		try
-		{
-			await NotificationService.ShowLocalNotification(
-				12,
-				"Download",
-				"Generating Certificate",
-				"Generating your birth certificate for download...");
+		var birthCertificate = await BirthCertificateData.LoadBirthCertificateOverviewByUser(_birthCertificateModel.UserId);
 
-			var birthCertificate = await BirthCertificateData.LoadBirthCertificateOverviewByUser(_birthCertificateModel.UserId);
+		// Generate certificate content
+		using var certificateStream = BirthCertificatePDFExport.GenerateBirthCertificate(birthCertificate, _user);
 
-			// Generate certificate content
-			using var certificateStream = BirthCertificatePDFExport.GenerateBirthCertificate(birthCertificate, _user);
+		// Generate filename
+		var fileName = BirthCertificatePDFExport.GenerateFileName(birthCertificate, _user);
 
-			// Generate filename
-			var fileName = BirthCertificatePDFExport.GenerateFileName(birthCertificate, _user);
+		// Save certificate
+		await SaveAndViewService.SaveAndView(fileName, "text/plain", certificateStream);
 
-			// Save certificate
-			await SaveAndViewService.SaveAndView(fileName, "text/plain", certificateStream);
-
-			VibrationService.VibrateHapticClick();
-
-			await NotificationService.ShowLocalNotification(
-				13,
-				"Success",
-				"Download Complete",
-				"Your birth certificate has been downloaded successfully!");
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(
-				14,
-				"Error",
-				"Download Failed",
-				$"Failed to download certificate: {ex.Message}");
-
-			VibrationService.VibrateWithTime(500);
-		}
+		VibrationService.VibrateHapticClick();
 	}
 }
