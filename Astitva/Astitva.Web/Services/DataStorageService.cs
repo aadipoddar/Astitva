@@ -19,7 +19,7 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
 
 	public async Task SecureRemoveAll()
 	{
-		await _protectedLocalStorage.DeleteAsync(StorageFileNames.UserDataFileName);
+		//await _protectedLocalStorage.DeleteAsync(StorageFileNames.UserDataFileName);
 	}
 
 

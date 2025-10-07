@@ -5,6 +5,8 @@ using AstitvaLibrary.DataAccess;
 
 using Microsoft.Extensions.Logging;
 
+using Syncfusion.Blazor;
+
 namespace Astitva;
 
 public static class MauiProgram
@@ -32,6 +34,7 @@ public static class MauiProgram
 		builder.Services.AddScoped<INotificationService, NotificationService>();
 
 		builder.Services.AddMauiBlazorWebView();
+		builder.Services.AddSyncfusionBlazor();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();

@@ -4,13 +4,16 @@ using Astitva.Web.Services;
 
 using AstitvaLibrary.DataAccess;
 
+using Syncfusion.Blazor;
+
 var builder = WebApplication.CreateBuilder(args);
 
 Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(Secrets.SyncfusionLicense);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
+builder.Services.AddSyncfusionBlazor()
+	.AddRazorComponents()
 	.AddInteractiveServerComponents();
 
 // Add device-specific services used by the Astitva.Shared project
