@@ -10,7 +10,7 @@ public static class BirthCertificateData
 	{
 		// Save to database first
 		await SqlDataAccess.SaveData(StoredProcedureNames.InsertBirthCertificate, birthCertificate);
-		
+
 		// Add to blockchain for immutable record
 		try
 		{

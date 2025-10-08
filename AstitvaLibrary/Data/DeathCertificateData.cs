@@ -10,7 +10,7 @@ public static class DeathCertificateData
 	{
 		// Save to database first
 		await DataAccess.SqlDataAccess.SaveData(DataAccess.StoredProcedureNames.InsertDeathCertificate, deathCertificate);
-		
+
 		// Add to blockchain for immutable record
 		try
 		{

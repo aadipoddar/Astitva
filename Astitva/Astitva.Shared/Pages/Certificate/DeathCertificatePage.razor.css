@@ -548,3 +548,171 @@
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #5a4fcf, #8b7ffc);
 }
+
+/* Voice Control Styles */
+::deep .voice-button {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 12px 24px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+::deep .voice-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4) !important;
+}
+
+::deep .voice-dialog {
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  font-weight: 600;
+  font-size: 18px;
+  color: #2d3748;
+}
+
+.dialog-icon {
+  width: 24px;
+  height: 24px;
+  fill: #667eea;
+}
+
+.dialog-content {
+  padding: 20px 0;
+}
+
+.voice-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+::deep .voice-transcript {
+  border: 2px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 15px !important;
+  font-size: 16px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  background: #f8f9fa !important;
+  resize: vertical !important;
+  min-height: 120px !important;
+  transition: all 0.3s ease !important;
+}
+
+::deep .voice-transcript:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  outline: none !important;
+  background: white !important;
+}
+
+.transcript-instructions {
+  background: linear-gradient(135deg, #f0f4ff, #e6f3ff);
+  border-radius: 12px;
+  padding: 20px;
+  border-left: 4px solid #667eea;
+}
+
+.transcript-instructions p {
+  margin: 0 0 15px 0;
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 16px;
+}
+
+.transcript-instructions ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #718096;
+}
+
+.transcript-instructions li {
+  margin-bottom: 8px;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+::deep .dialog-btn-cancel {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 2px solid #e2e8f0 !important;
+  color: #4a5568 !important;
+  font-weight: 600 !important;
+  padding: 12px 24px !important;
+  border-radius: 10px !important;
+  transition: all 0.3s ease !important;
+}
+
+::deep .dialog-btn-cancel:hover {
+  background: #f7fafc !important;
+  border-color: #cbd5e0 !important;
+  transform: translateY(-1px) !important;
+}
+
+::deep .dialog-btn-save {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 12px 24px !important;
+  border-radius: 10px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+}
+
+::deep .dialog-btn-save:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+}
+
+/* Speech to text component styling */
+::deep .e-speech-to-text {
+  margin-bottom: 15px;
+}
+
+::deep .e-speech-to-text .e-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52) !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 50px !important;
+  width: 60px !important;
+  height: 60px !important;
+  font-size: 24px !important;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4) !important;
+  transition: all 0.3s ease !important;
+}
+
+::deep .e-speech-to-text .e-btn:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6) !important;
+}
+
+::deep .e-speech-to-text .e-btn.e-active {
+  background: linear-gradient(135deg, #4caf50, #45a049) !important;
+  animation: pulse 2s infinite !important;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}

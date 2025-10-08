@@ -1,21 +1,25 @@
 # 🔗 Astitva Blockchain Integration
 
 ## Overview
+
 Astitva now includes a **simple, local blockchain implementation** that ensures certificate authenticity and prevents fraud. This integration requires **no external APIs** and runs entirely within your application.
 
 ## 🚀 Key Features
 
 ### 1. **Certificate Immutability**
+
 - Every certificate is automatically hashed and stored on the blockchain
 - Once recorded, certificates cannot be altered or deleted
 - Provides tamper-proof verification
 
 ### 2. **Instant Verification**
+
 - Anyone can verify a certificate's authenticity using its hash
 - No need for centralized verification servers
 - Works offline with local blockchain data
 
 ### 3. **Simple Integration**
+
 - No complex setup or external dependencies
 - Blockchain runs locally as JSON files
 - Automatic integration with existing certificate creation process
@@ -23,6 +27,7 @@ Astitva now includes a **simple, local blockchain implementation** that ensures 
 ## 🛠️ How It Works
 
 ### Certificate Creation Process
+
 ```
 1. User creates certificate → Saved to database
 2. System generates SHA256 hash → Added to blockchain
@@ -30,6 +35,7 @@ Astitva now includes a **simple, local blockchain implementation** that ensures 
 ```
 
 ### Verification Process
+
 ```
 1. User provides certificate hash
 2. System searches blockchain for matching hash
@@ -39,6 +45,7 @@ Astitva now includes a **simple, local blockchain implementation** that ensures 
 ## 📋 Usage Examples
 
 ### Adding a Certificate to Blockchain
+
 ```csharp
 // This happens automatically when you save a certificate
 var birthCertificate = new BirthCertificateModel { /* ... */ };
@@ -47,6 +54,7 @@ await BirthCertificateData.InsertBirthCertificate(birthCertificate);
 ```
 
 ### Verifying a Certificate
+
 ```csharp
 // Verify using certificate hash
 var result = await BlockchainService.VerifyCertificateByHashAsync(certificateHash);
@@ -62,6 +70,7 @@ else
 ```
 
 ### Getting Blockchain Statistics
+
 ```csharp
 var stats = await BlockchainService.GetBlockchainStatsAsync();
 Console.WriteLine($"Total certificates on blockchain: {stats.BirthCertificates + stats.DeathCertificates}");
@@ -70,11 +79,13 @@ Console.WriteLine($"Total certificates on blockchain: {stats.BirthCertificates +
 ## 🔍 User Interface Features
 
 ### Home Page
+
 - **Blockchain Statistics**: Shows total blocks and certificates
 - **Quick Verification Link**: Easy access to certificate verification
 - **Visual Status Indicators**: Shows blockchain health status
 
 ### Verification Page (`/verify`)
+
 - **Hash Input**: Enter certificate hash for verification
 - **Real-time Results**: Instant verification with detailed feedback
 - **Blockchain Stats**: Live statistics about the blockchain
@@ -83,16 +94,19 @@ Console.WriteLine($"Total certificates on blockchain: {stats.BirthCertificates +
 ## 🛡️ Security Features
 
 ### Hash Generation
+
 - Uses **SHA256** cryptographic hashing
 - Combines multiple certificate fields for uniqueness
 - Generates different hashes for birth and death certificates
 
 ### Blockchain Validation
+
 - Chain integrity checked on every operation
 - Each block references the previous block's hash
 - Invalid chains are detected and rejected
 
 ### Data Protection
+
 - Certificates are hashed, not stored in full on blockchain
 - Original data remains in your secure database
 - Blockchain only contains verification hashes
@@ -118,21 +132,25 @@ Astitva.Shared/
 ## 🎯 Benefits for Astitva
 
 ### 1. **Fraud Prevention**
+
 - Impossible to forge certificates once on blockchain
 - Instant detection of tampered documents
 - Builds trust with users and authorities
 
 ### 2. **Modern Technology**
+
 - Blockchain is cutting-edge and impressive
 - Shows innovation in government services
 - Positions Astitva as a forward-thinking solution
 
 ### 3. **Easy to Use**
+
 - No complex blockchain knowledge required
 - Works seamlessly with existing features
 - Simple verification process for all users
 
 ### 4. **No External Dependencies**
+
 - No need for cryptocurrency or external blockchain networks
 - No API keys or external services required
 - Complete control over your data
@@ -147,6 +165,7 @@ Astitva.Shared/
 ## 🔧 Technical Details
 
 ### Blockchain Structure
+
 ```csharp
 public class CertificateBlock
 {
@@ -161,6 +180,7 @@ public class CertificateBlock
 ```
 
 ### Storage
+
 - Blockchain stored as `certificate_blockchain.json`
 - Human-readable JSON format
 - Automatic backup and recovery

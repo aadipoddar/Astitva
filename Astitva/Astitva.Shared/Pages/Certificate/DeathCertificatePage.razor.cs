@@ -19,6 +19,11 @@ public partial class DeathCertificatePage
 	private Dictionary<string, string> _validationErrors = new();
 	private bool _showValidationSummary = false;
 
+	// Voice control fields
+	private bool _showVoiceDialog = false;
+	private string _transcript = "";
+	private DeathCertificateResponseModel _extractedDeathCertificate = new();
+
 	protected override async Task OnInitializedAsync()
 	{
 		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
@@ -228,4 +233,74 @@ public partial class DeathCertificatePage
 
 		VibrationService.VibrateHapticClick();
 	}
+
+	#region Voice Assistance
+	private void CloseVoiceDialog() =>
+		_showVoiceDialog = false;
+
+	private void OnVoiceAssistantClick()
+	{
+		_showVoiceDialog = true;
+		_transcript = "";
+		_extractedDeathCertificate = new();
+		StateHasChanged();
+	}
+
+	private async Task OnProcessTranscriptClick()
+	{
+		if (string.IsNullOrWhiteSpace(_transcript))
+			return;
+
+		try
+		{
+			_extractedDeathCertificate = await DeathCertificateAIProcessing.ExtractDeathCertificateDetailsFromTranscript(_transcript);
+
+			if (_extractedDeathCertificate is null)
+				return;
+
+			// Apply extracted data to the form
+			if (!string.IsNullOrEmpty(_extractedDeathCertificate.firstName))
+				_deathCertificateModel.FirstName = _extractedDeathCertificate.firstName;
+
+			if (!string.IsNullOrEmpty(_extractedDeathCertificate.middleName))
+				_deathCertificateModel.MiddleName = _extractedDeathCertificate.middleName;
+
+			if (!string.IsNullOrEmpty(_extractedDeathCertificate.lastName))
+				_deathCertificateModel.LastName = _extractedDeathCertificate.lastName;
+
+			if (!string.IsNullOrEmpty(_extractedDeathCertificate.sex))
+				_deathCertificateModel.Sex = _extractedDeathCertificate.sex;
+
+			if (!string.IsNullOrEmpty(_extractedDeathCertificate.dateOfDeath))
+			{
+				if (DateTime.TryParse(_extractedDeathCertificate.dateOfDeath, out DateTime parsedDate))
+					_deathCertificateModel.DateOfDeath = DateOnly.FromDateTime(parsedDate);
+			}
+
+			if (!string.IsNullOrEmpty(_extractedDeathCertificate.deathPlace))
+				_deathCertificateModel.DeathPlace = _extractedDeathCertificate.deathPlace;
+
+			if (!string.IsNullOrEmpty(_extractedDeathCertificate.fatherName))
+				_deathCertificateModel.FatherName = _extractedDeathCertificate.fatherName;
+
+			if (!string.IsNullOrEmpty(_extractedDeathCertificate.motherName))
+				_deathCertificateModel.MotherName = _extractedDeathCertificate.motherName;
+
+			if (!string.IsNullOrEmpty(_extractedDeathCertificate.address))
+				_deathCertificateModel.Address = _extractedDeathCertificate.address;
+
+			// Clear validation errors after applying voice data
+			_validationErrors.Clear();
+			_showValidationSummary = false;
+
+			_showVoiceDialog = false;
+			VibrationService.VibrateHapticClick();
+			StateHasChanged();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error extracting information: {ex.Message}");
+		}
+	}
+	#endregion
 }

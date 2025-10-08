@@ -29,7 +29,7 @@ public static class BlockchainService
             {
                 var json = await File.ReadAllTextAsync(BlockchainFileName);
                 var loadedBlockchain = JsonSerializer.Deserialize<CertificateBlockchain>(json);
-                
+
                 // Validate the loaded blockchain
                 if (loadedBlockchain != null && loadedBlockchain.IsChainValid())
                 {

@@ -41,7 +41,7 @@ public static class BlockchainDemo
         Console.WriteLine($"✅ Birth Certificate added to blockchain!");
         Console.WriteLine($"🔑 Certificate Hash: {certificateHash}");
         Console.WriteLine($"📅 Registration Date: {birthCertificate.RegistrationDate}");
-        
+
         return certificateHash;
     }
 
@@ -51,19 +51,19 @@ public static class BlockchainDemo
     public static async Task<bool> VerifyCertificateExample(string certificateHash)
     {
         Console.WriteLine($"\n🔍 Verifying certificate with hash: {certificateHash}");
-        
+
         // Verify the certificate
         var result = await BlockchainService.VerifyCertificateByHashAsync(certificateHash);
-        
+
         Console.WriteLine($"📋 Verification Result: {result.Message}");
-        
+
         if (result.Block != null)
         {
             Console.WriteLine($"⛓️  Block Index: {result.Block.Index}");
             Console.WriteLine($"📅 Timestamp: {result.Block.Timestamp:yyyy-MM-dd HH:mm:ss} UTC");
             Console.WriteLine($"📝 Certificate Type: {result.Block.CertificateType}");
         }
-        
+
         return result.IsValid;
     }
 
@@ -73,7 +73,7 @@ public static class BlockchainDemo
     public static async Task ShowBlockchainStats()
     {
         var stats = await BlockchainService.GetBlockchainStatsAsync();
-        
+
         Console.WriteLine("\n📊 Blockchain Statistics:");
         Console.WriteLine($"   Total Blocks: {stats.TotalBlocks}");
         Console.WriteLine($"   Birth Certificates: {stats.BirthCertificates}");
@@ -89,7 +89,7 @@ public static class BlockchainDemo
     {
         Console.WriteLine("🔗 Astitva Blockchain Demo");
         Console.WriteLine("=" + new string('=', 50));
-        
+
         try
         {
             // 1. Show initial blockchain state

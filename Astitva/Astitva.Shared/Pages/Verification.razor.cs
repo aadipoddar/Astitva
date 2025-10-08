@@ -33,8 +33,8 @@ public partial class Verification
         catch (Exception ex)
         {
             verificationResult = new CertificateVerificationResult(
-                false, 
-                false, 
+                false,
+                false,
                 $"Verification error: {ex.Message}"
             );
         }

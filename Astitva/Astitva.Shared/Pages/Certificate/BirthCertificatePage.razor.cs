@@ -29,6 +29,11 @@ public partial class BirthCertificatePage
 	private bool _isBirthPlaceFocused = false;
 	private bool _isAddressFocused = false;
 
+	// Voice control fields
+	private bool _showVoiceDialog = false;
+	private string _transcript = "";
+	private BirthCertificateResponseModel _extractedBirthCertificate = new();
+
 	protected override async Task OnInitializedAsync()
 	{
 		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
@@ -242,4 +247,77 @@ public partial class BirthCertificatePage
 
 		VibrationService.VibrateHapticClick();
 	}
+
+	#region Voice Assistance
+	private void CloseVoiceDialog() =>
+		_showVoiceDialog = false;
+
+	private void OnVoiceAssistantClick()
+	{
+		_showVoiceDialog = true;
+		_transcript = "";
+		_extractedBirthCertificate = new();
+		StateHasChanged();
+	}
+
+	private async Task OnProcessTranscriptClick()
+	{
+		if (string.IsNullOrWhiteSpace(_transcript))
+			return;
+
+		try
+		{
+			_extractedBirthCertificate = await BirthCertificateAIProcessing.ExtractBirthCertificateDetailsFromTranscript(_transcript);
+
+			if (_extractedBirthCertificate is null)
+				return;
+
+			// Apply extracted data to the form
+			if (!string.IsNullOrEmpty(_extractedBirthCertificate.firstName))
+				_birthCertificateModel.FirstName = _extractedBirthCertificate.firstName;
+
+			if (!string.IsNullOrEmpty(_extractedBirthCertificate.middleName))
+				_birthCertificateModel.MiddleName = _extractedBirthCertificate.middleName;
+
+			if (!string.IsNullOrEmpty(_extractedBirthCertificate.lastName))
+				_birthCertificateModel.LastName = _extractedBirthCertificate.lastName;
+
+			if (!string.IsNullOrEmpty(_extractedBirthCertificate.sex))
+				_birthCertificateModel.Sex = _extractedBirthCertificate.sex;
+
+			if (!string.IsNullOrEmpty(_extractedBirthCertificate.dateOfBirth))
+			{
+				if (DateTime.TryParse(_extractedBirthCertificate.dateOfBirth, out DateTime parsedDate))
+					_birthCertificateModel.DateOfBirth = DateOnly.FromDateTime(parsedDate);
+			}
+
+			if (!string.IsNullOrEmpty(_extractedBirthCertificate.birthPlace))
+				_birthCertificateModel.BirthPlace = _extractedBirthCertificate.birthPlace;
+
+			if (!string.IsNullOrEmpty(_extractedBirthCertificate.fatherName))
+				_birthCertificateModel.FatherName = _extractedBirthCertificate.fatherName;
+
+			if (!string.IsNullOrEmpty(_extractedBirthCertificate.motherName))
+				_birthCertificateModel.MotherName = _extractedBirthCertificate.motherName;
+
+			if (!string.IsNullOrEmpty(_extractedBirthCertificate.address))
+				_birthCertificateModel.Address = _extractedBirthCertificate.address;
+
+			if (_extractedBirthCertificate.registrationNo.HasValue)
+				_birthCertificateModel.RegistrationNo = _extractedBirthCertificate.registrationNo;
+
+			// Clear validation errors after applying voice data
+			_validationErrors.Clear();
+			_showValidationSummary = false;
+
+			_showVoiceDialog = false;
+			VibrationService.VibrateHapticClick();
+			StateHasChanged();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error extracting information: {ex.Message}");
+		}
+	}
+	#endregion
 }

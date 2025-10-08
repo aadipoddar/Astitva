@@ -724,18 +724,18 @@
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .blockchain-card {
     flex-direction: column;
     text-align: center;
     padding: 20px;
   }
-  
+
   .blockchain-stats-mini {
     flex-direction: row;
     justify-content: space-around;
   }
-  
+
   .stat-mini {
     flex: 1;
     margin: 0 5px;
