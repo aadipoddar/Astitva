@@ -4,6 +4,7 @@ using Astitva.Shared.Services;
 using AstitvaLibrary.Data;
 using AstitvaLibrary.Exporting;
 using AstitvaLibrary.Models;
+using AstitvaLibrary.Services;
 
 namespace Astitva.Shared.Pages;
 
@@ -15,6 +16,7 @@ public partial class Home
 	private UserModel _user;
 	private BirthCertificateOverviewModel _birthCertificate;
 	private DeathCertificateOverviewModel _deathCertificate;
+	private BlockchainStats? blockchainStats;
 	private bool _isLoading = true;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -29,6 +31,7 @@ public partial class Home
 			return;
 
 		await LoadData();
+		await LoadBlockchainStats();
 		_isLoading = false;
 		StateHasChanged();
 	}
@@ -92,6 +95,20 @@ public partial class Home
 
 	private void NavigateToBirthCertificate() => NavigationManager.NavigateTo("/certificate/birth");
 	private void NavigateToDeathCertificate() => NavigationManager.NavigateTo("/certificate/death");
+	private void NavigateToVerification() => NavigationManager.NavigateTo("/verify");
+
+	private async Task LoadBlockchainStats()
+	{
+		try
+		{
+			blockchainStats = await BlockchainService.GetBlockchainStatsAsync();
+		}
+		catch
+		{
+			// Handle error silently
+			blockchainStats = null;
+		}
+	}
 
 	private async Task Logout() =>
 		await AuthService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);

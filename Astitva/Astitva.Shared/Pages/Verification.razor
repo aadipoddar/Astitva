@@ -1,0 +1,114 @@
+@page "/verify"
+@using AstitvaLibrary.Services
+@using AstitvaLibrary.Models
+@inject IJSRuntime JSRuntime
+
+<div class="verification-container">
+    <div class="verification-header">
+        <h2>🔗 Certificate Blockchain Verification</h2>
+        <p>Verify the authenticity of any certificate using our blockchain technology</p>
+    </div>
+
+    <div class="verification-card">
+        <div class="input-section">
+            <label for="certificateHash">Certificate Hash:</label>
+            <input @bind="certificateHash" 
+                   class="hash-input" 
+                   placeholder="Enter certificate hash to verify..." 
+                   id="certificateHash" />
+            
+            <button @onclick="VerifyCertificate" 
+                    class="verify-btn" 
+                    disabled="@(isVerifying || string.IsNullOrWhiteSpace(certificateHash))">
+                @if (isVerifying)
+                {
+                    <span class="spinner"></span>
+                    <text>Verifying...</text>
+                }
+                else
+                {
+                    <text>🔍 Verify Certificate</text>
+                }
+            </button>
+        </div>
+
+        @if (verificationResult != null)
+        {
+            <div class="verification-result @(verificationResult.IsValid ? "valid" : "invalid")">
+                <div class="result-icon">
+                    @if (verificationResult.IsValid)
+                    {
+                        <span class="checkmark">✅</span>
+                    }
+                    else
+                    {
+                        <span class="cross">❌</span>
+                    }
+                </div>
+                
+                <div class="result-content">
+                    <h3>@(verificationResult.IsValid ? "Certificate Verified!" : "Verification Failed")</h3>
+                    <p>@verificationResult.Message</p>
+                    
+                    @if (verificationResult.Block != null)
+                    {
+                        <div class="block-details">
+                            <h4>Blockchain Details:</h4>
+                            <ul>
+                                <li><strong>Block Index:</strong> @verificationResult.Block.Index</li>
+                                <li><strong>Certificate Type:</strong> @verificationResult.Block.CertificateType</li>
+                                <li><strong>Timestamp:</strong> @verificationResult.Block.Timestamp.ToString("yyyy-MM-dd HH:mm:ss") UTC</li>
+                                <li><strong>Certificate ID:</strong> @verificationResult.Block.CertificateId</li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="blockchain-stats">
+        <h3>📊 Blockchain Statistics</h3>
+        @if (blockchainStats != null)
+        {
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">@blockchainStats.TotalBlocks</span>
+                    <span class="stat-label">Total Blocks</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@blockchainStats.BirthCertificates</span>
+                    <span class="stat-label">Birth Certificates</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@blockchainStats.DeathCertificates</span>
+                    <span class="stat-label">Death Certificates</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-status @(blockchainStats.IsValid ? "valid" : "invalid")">
+                        @(blockchainStats.IsValid ? "✅ Valid" : "❌ Invalid")
+                    </span>
+                    <span class="stat-label">Blockchain Status</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="how-it-works">
+        <h3>🛡️ How Blockchain Verification Works</h3>
+        <div class="info-cards">
+            <div class="info-card">
+                <h4>1. Certificate Creation</h4>
+                <p>When a certificate is issued, a unique hash is generated and stored on our blockchain.</p>
+            </div>
+            <div class="info-card">
+                <h4>2. Immutable Record</h4>
+                <p>Once on the blockchain, the certificate record cannot be altered or deleted.</p>
+            </div>
+            <div class="info-card">
+                <h4>3. Instant Verification</h4>
+                <p>Anyone can verify a certificate's authenticity by checking its hash against the blockchain.</p>
+            </div>
+        </div>
+    </div>
+</div>

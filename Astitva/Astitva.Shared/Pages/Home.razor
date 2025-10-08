@@ -119,6 +119,42 @@
 				</div>
 			}
 
+			<!-- Blockchain Verification Section -->
+			<div class="blockchain-section">
+				<h2 class="section-title">🔗 Blockchain Verification</h2>
+				<div class="blockchain-info">
+					<div class="blockchain-card">
+						<div class="blockchain-icon">⛓️</div>
+						<div class="blockchain-content">
+							<h3>Certificate Authenticity</h3>
+							<p>All certificates are secured on our blockchain for immutable verification and fraud prevention.</p>
+							<SfButton Content="Verify Certificate"
+									  CssClass="verify-button primary-button"
+									  OnClick="NavigateToVerification" />
+						</div>
+					</div>
+					@if (blockchainStats != null)
+					{
+						<div class="blockchain-stats-mini">
+							<div class="stat-mini">
+								<span class="stat-number">@blockchainStats.TotalBlocks</span>
+								<span class="stat-label">Blocks</span>
+							</div>
+							<div class="stat-mini">
+								<span class="stat-number">@(blockchainStats.BirthCertificates + blockchainStats.DeathCertificates)</span>
+								<span class="stat-label">Certificates</span>
+							</div>
+							<div class="stat-mini">
+								<span class="stat-status @(blockchainStats.IsValid ? "valid" : "invalid")">
+									@(blockchainStats.IsValid ? "✅" : "❌")
+								</span>
+								<span class="stat-label">Status</span>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+
 			<!-- Add Certificate Section -->
 			<div class="add-certificates-section">
 				<h2 class="section-title">Add New Certificate</h2>

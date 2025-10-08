@@ -588,6 +588,125 @@
   animation-delay: 0.4s;
 }
 
+/* Blockchain Section Styles */
+.blockchain-section {
+  margin-bottom: 40px;
+}
+
+.blockchain-info {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.blockchain-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.blockchain-icon {
+  font-size: 3rem;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.blockchain-content h3 {
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.blockchain-content p {
+  color: #5f6368;
+  margin: 0 0 20px 0;
+  line-height: 1.6;
+}
+
+.verify-button {
+  background: linear-gradient(135deg, #3498db, #2980b9) !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  text-transform: none !important;
+}
+
+.verify-button:hover {
+  background: linear-gradient(135deg, #2980b9, #21618c) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+.blockchain-stats-mini {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+  animation-delay: 0.2s;
+}
+
+.stat-mini {
+  text-align: center;
+  padding: 10px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+}
+
+.stat-mini .stat-number {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #3498db;
+  margin-bottom: 5px;
+}
+
+.stat-mini .stat-status {
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+.stat-mini .stat-status.valid {
+  color: #27ae60;
+}
+
+.stat-mini .stat-status.invalid {
+  color: #e74c3c;
+}
+
+.stat-mini .stat-label {
+  display: block;
+  color: #7f8c8d;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -596,5 +715,29 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Mobile Responsiveness for Blockchain Section */
+@media (max-width: 768px) {
+  .blockchain-info {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .blockchain-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .blockchain-stats-mini {
+    flex-direction: row;
+    justify-content: space-around;
+  }
+  
+  .stat-mini {
+    flex: 1;
+    margin: 0 5px;
   }
 }
